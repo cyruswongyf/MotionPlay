@@ -21,5 +21,3 @@ Train gesture recognition model.
 1. First run `collect_gesture_data.py` to collect training data
 2. Then run `train_custom_gesture_classifier.py` to train the model
 3. Trained models will be saved in the `custom_gesture_recognizer/` directory
-
-For more details, see the documentation files in the `docs/` directory.

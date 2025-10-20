@@ -23,14 +23,8 @@ ENV/
 # macOS
 .DS_Store
 
-# Models (large files)
+# Models
 models/*.task
-
-# Custom trained models
-custom_gesture_recognizer/*.pkl
-
-# Data
-data/*.csv
 
 # Logs
 *.log
