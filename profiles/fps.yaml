@@ -3,35 +3,36 @@
 
 name: fps
 
-# FPS motion mappings
-# Designed for quick weapon switching, reloading, and tactical actions
+# FPS motion mappings - aggressive run-and-gun style
+# Optimized for CS:GO, Valorant, Call of Duty, Apex Legends
 
 mappings:
-  # Movement (WASD)
-  Pointing_Up: w # Move forward
-  Pointing_Down: s # Move backward
+  # Combat
+  Fist: left_click # Fire weapon
+  Open_Palm: right_click # Aim down sights / Scope
+  Closed_Fist: v # Melee attack
+
+  # Movement
+  Victory: space # Jump
+  Thumb_Down: c # Crouch / Slide
+  Thumb_Up: w # Sprint forward
   Pointing_Left: a # Strafe left
   Pointing_Right: d # Strafe right
 
-  # Actions
-  Fist: left_click # Fire weapon
-  Open_Palm: right_click # Aim down sights
-  Victory: space # Jump
-  Thumb_Down: ctrl # Crouch
+  # Weapon Actions
+  Peace: r # Reload
+  Two_Fingers: g # Grenade
+  Three_Fingers: 1 # Switch to primary
 
-  # Weapon management
-  Thumb_Up: r # Reload
-  Peace: 1 # Primary weapon
-  Two_Fingers: 2 # Secondary weapon
-  Three_Fingers: 3 # Melee weapon
+  # Abilities (Valorant/Apex style)
+  Rock: q # Ability 1
+  ILoveYou: e # Ability 2 / Interact
+  Shaka: f # Ultimate ability
 
-  # Tactical
-  Rock: e # Use/Interact
-  Pointing: q # Ability/Grenade
+  # Quick Actions
+  Pointing_Up_Thumb: x # Ping / Mark
+  Thumb_Index_Crossed: z # Tactical equipment
 
   # System
-  Swipe_Left: tab # Scoreboard
-  Swipe_Right: esc # Menu
-
-  # Communication
-  Call_Me: z # Voice chat (push to talk)
+  Closed_Fist_Raised: tab # Scoreboard
+  Palm_Up: m # Map

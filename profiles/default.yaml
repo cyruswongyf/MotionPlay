@@ -3,29 +3,36 @@
 
 name: default
 
-# Motion to keyboard/mouse mappings
-# Format: motion_name: key_or_action
-#
-# Supported actions:
-#   - Single characters: a, b, c, 1, 2, 3, etc.
-#   - Special keys: space, enter, tab, backspace, shift, ctrl, alt, esc, up, down, left, right
-#   - Mouse: left_click, right_click, middle_click
-#   - Strings: Any multi-character string will be typed out
+# Default motion mappings - simple and intuitive
+# Basic mappings for general use and testing
 
 mappings:
-  # Basic gestures
-  Fist: space
-  Open_Palm: left_click
-  Victory: w
-  Thumb_Up: e
-  Thumb_Down: q
+  # Mouse Actions
+  Fist: left_click # Primary click
+  Open_Palm: right_click # Secondary click
 
-  # Additional gestures (if trained)
-  Pointing_Up: up
-  Pointing_Down: down
-  Pointing_Left: left
-  Pointing_Right: right
+  # Navigation
+  Victory: space # Space bar
+  Thumb_Up: up # Arrow up
+  Thumb_Down: down # Arrow down
+  Pointing_Left: left # Arrow left
+  Pointing_Right: right # Arrow right
 
-  # Custom gestures
-  # Peace: enter
-  # Rock: backspace
+  # Common Keys
+  Peace: enter # Confirm
+  Rock: esc # Cancel / Escape
+  Closed_Fist: backspace # Delete
+  Two_Fingers: tab # Tab
+  Three_Fingers: shift # Shift modifier
+
+  # WASD Movement (gaming standard)
+  Thumb_Up_Forward: w # Forward
+  Thumb_Down_Back: s # Backward
+  Palm_Left: a # Left
+  Palm_Right: d # Right
+
+  # Extras
+  ILoveYou: ctrl # Control modifier
+  Shaka: alt # Alt modifier
+  Pointing_Up_Thumb: f # F key (common interact)
+  Thumb_Index_Crossed: e # E key (common use)

@@ -8,8 +8,10 @@ import cv2
 import mediapipe as mp
 import numpy as np
 import logging
+from pathlib import Path
 from typing import Optional, List, Dict, Any
 from dataclasses import dataclass
+from . import model_manager
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +50,9 @@ class MediaPipeProcessor:
         gesture_model_path: str = 'models/gesture_recognizer.task',
         num_hands: int = 2,
         enable_pose: bool = False,
-        enable_gestures: bool = True
+        enable_gestures: bool = True,
+        offline_mode: bool = False,
+        prefer_custom_gesture: bool = True
     ):
         """
         Initialize MediaPipe processors.
@@ -60,10 +64,29 @@ class MediaPipeProcessor:
             num_hands: Maximum number of hands to detect
             enable_pose: Whether to enable pose detection
             enable_gestures: Whether to enable gesture recognition
+            offline_mode: Skip auto-download checks (for air-gapped systems)
+            prefer_custom_gesture: Auto-detect and use custom gesture model if available
         """
+        # Ensure models are downloaded before initialization
+        try:
+            model_manager.ensure_models_exist(offline_mode=offline_mode)
+        except RuntimeError as e:
+            logger.error(f"Model initialization failed: {e}")
+            raise
+        
+        # Auto-detect custom gesture recognizer
+        if prefer_custom_gesture:
+            custom_gesture_path = 'models/custom_gesture_recognizer.task'
+            if Path(custom_gesture_path).exists():
+                logger.info(f"Custom gesture recognizer detected: {custom_gesture_path}")
+                gesture_model_path = custom_gesture_path
+            else:
+                logger.info("Using official gesture recognizer (no custom model found)")
+        
         self.num_hands = num_hands
         self.enable_pose = enable_pose
         self.enable_gestures = enable_gestures
+        self.gesture_model_path = gesture_model_path
         
         # Results storage
         self.hand_results: Optional[Any] = None
@@ -79,6 +102,7 @@ class MediaPipeProcessor:
         if enable_gestures:
             self._init_gesture_recognizer(gesture_model_path)
         
+        logger.info("All MediaPipe models ready")
         logger.info(f"MediaPipeProcessor initialized (hands={num_hands}, pose={enable_pose}, gestures={enable_gestures})")
     
     def _init_hand_landmarker(self, model_path: str) -> None:

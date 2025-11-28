@@ -1,15 +1,17 @@
 """
 Motion Recorder for MotionPlay
 Records motion sequences and saves them for training.
+Includes normalization and resampling for MediaPipe Model Maker compatibility.
 Pure logic - no UI dependencies.
 """
 
 import json
 import logging
 import numpy as np
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Tuple
 from pathlib import Path
 from datetime import datetime
+from scipy import interpolate
 
 logger = logging.getLogger(__name__)
 
@@ -17,33 +19,45 @@ logger = logging.getLogger(__name__)
 class MotionRecorder:
     """
     Records motion sequences from hand/pose landmarks.
-    Saves recordings as JSON or NumPy files for training.
+    Saves recordings as JSON with normalization and resampling for training.
+    
+    Features:
+    - Landmark normalization (relative to wrist)
+    - Temporal resampling to fixed length
+    - MediaPipe Model Maker compatible format
     
     Attributes:
         output_dir: Directory to save recordings
-        max_frames: Maximum frames to record per sequence
+        target_frames: Target number of frames after resampling
         recording: Whether currently recording
     """
+    
+    # MediaPipe hand landmark indices
+    WRIST_INDEX = 0
+    NUM_HAND_LANDMARKS = 21
     
     def __init__(
         self,
         output_dir: str = 'assets/recordings',
-        max_frames: int = 150,
-        min_frames: int = 15
+        target_frames: int = 60,
+        min_frames: int = 15,
+        normalize: bool = True
     ):
         """
         Initialize motion recorder.
         
         Args:
             output_dir: Directory to save recordings
-            max_frames: Maximum frames per sequence
+            target_frames: Target number of frames after resampling
             min_frames: Minimum frames for valid recording
+            normalize: Whether to normalize landmarks relative to wrist
         """
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
         
-        self.max_frames = max_frames
+        self.target_frames = target_frames
         self.min_frames = min_frames
+        self.normalize = normalize
         
         # Recording state
         self.recording = False
@@ -51,7 +65,7 @@ class MotionRecorder:
         self.recorded_frames: List[Dict[str, Any]] = []
         self.recorded_sequences: List[List[Dict[str, Any]]] = []
         
-        logger.info(f"MotionRecorder initialized (output: {output_dir})")
+        logger.info(f"MotionRecorder initialized (output: {output_dir}, target_frames: {target_frames})")
     
     def start_recording(self, motion_name: str) -> None:
         """
@@ -80,13 +94,12 @@ class MotionRecorder:
             pose_landmarks: Optional PoseLandmarks from MediaPipeProcessor
             
         Returns:
-            True if frame recorded, False if max frames reached
+            True if frame recorded, False otherwise
         """
         if not self.recording:
             return False
         
-        if len(self.recorded_frames) >= self.max_frames:
-            logger.warning(f"Max frames ({self.max_frames}) reached")
+        if not hand_landmarks:
             return False
         
         # Extract landmark data
@@ -112,6 +125,103 @@ class MotionRecorder:
         
         self.recorded_frames.append(frame_data)
         return True
+    
+    def _normalize_landmarks(self, landmarks: List[Tuple[float, float, float]]) -> List[Tuple[float, float, float]]:
+        """
+        Normalize landmarks relative to wrist position.
+        
+        Args:
+            landmarks: List of (x, y, z) tuples
+            
+        Returns:
+            Normalized landmarks
+        """
+        if not landmarks or len(landmarks) < self.NUM_HAND_LANDMARKS:
+            return landmarks
+        
+        # Get wrist position (landmark 0)
+        wrist_x, wrist_y, wrist_z = landmarks[self.WRIST_INDEX]
+        
+        # Normalize all landmarks relative to wrist
+        normalized = []
+        for x, y, z in landmarks:
+            normalized.append((
+                x - wrist_x,
+                y - wrist_y,
+                z - wrist_z
+            ))
+        
+        return normalized
+    
+    def _resample_sequence(self, sequence: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """
+        Resample sequence to target number of frames using interpolation.
+        
+        Args:
+            sequence: Original sequence of frames
+            
+        Returns:
+            Resampled sequence
+        """
+        if len(sequence) == self.target_frames:
+            return sequence
+        
+        if len(sequence) < 2:
+            # Can't interpolate, just duplicate frames
+            return sequence * self.target_frames
+        
+        # Extract landmarks for interpolation
+        original_indices = np.linspace(0, len(sequence) - 1, len(sequence))
+        target_indices = np.linspace(0, len(sequence) - 1, self.target_frames)
+        
+        resampled_sequence = []
+        
+        # Get number of hands (assume consistent across sequence)
+        num_hands = len(sequence[0]['hands'])
+        
+        for target_idx in target_indices:
+            # Find interpolation weights
+            frame_data = {
+                'timestamp': datetime.now().isoformat(),
+                'hands': []
+            }
+            
+            for hand_idx in range(num_hands):
+                # Extract all landmarks for this hand across time
+                landmarks_over_time = []
+                handedness = sequence[0]['hands'][hand_idx]['handedness']
+                
+                for frame in sequence:
+                    if hand_idx < len(frame['hands']):
+                        landmarks_over_time.append(frame['hands'][hand_idx]['landmarks'])
+                
+                # Interpolate each landmark coordinate
+                if landmarks_over_time:
+                    num_landmarks = len(landmarks_over_time[0])
+                    interpolated_landmarks = []
+                    
+                    for lm_idx in range(num_landmarks):
+                        # Get x, y, z for this landmark across all frames
+                        x_values = [lms[lm_idx][0] for lms in landmarks_over_time]
+                        y_values = [lms[lm_idx][1] for lms in landmarks_over_time]
+                        z_values = [lms[lm_idx][2] for lms in landmarks_over_time]
+                        
+                        # Interpolate
+                        x_interp = np.interp(target_idx, original_indices, x_values)
+                        y_interp = np.interp(target_idx, original_indices, y_values)
+                        z_interp = np.interp(target_idx, original_indices, z_values)
+                        
+                        interpolated_landmarks.append((float(x_interp), float(y_interp), float(z_interp)))
+                    
+                    frame_data['hands'].append({
+                        'handedness': handedness,
+                        'landmarks': interpolated_landmarks,
+                        'score': 1.0
+                    })
+            
+            resampled_sequence.append(frame_data)
+        
+        return resampled_sequence
     
     def complete_sequence(self) -> bool:
         """
@@ -186,15 +296,32 @@ class MotionRecorder:
             return None
     
     def _save_json(self, filepath: Path) -> None:
-        """Save recording as JSON."""
+        """Save recording as JSON in MediaPipe Model Maker compatible format."""
+        processed_sequences = []
+        
+        for sequence in self.recorded_sequences:
+            # Resample to target frames
+            resampled = self._resample_sequence(sequence)
+            
+            # Normalize landmarks if enabled
+            if self.normalize:
+                for frame in resampled:
+                    for hand in frame['hands']:
+                        hand['landmarks'] = self._normalize_landmarks(hand['landmarks'])
+            
+            processed_sequences.append(resampled)
+        
+        # MediaPipe Model Maker format
         data = {
-            'motion_name': self.current_motion_name,
-            'num_sequences': len(self.recorded_sequences),
-            'sequences': self.recorded_sequences,
+            'gesture_name': self.current_motion_name,
+            'num_sequences': len(processed_sequences),
+            'target_frames': self.target_frames,
+            'normalized': self.normalize,
+            'sequences': processed_sequences,
             'metadata': {
-                'max_frames': self.max_frames,
-                'min_frames': self.min_frames,
-                'recorded_at': datetime.now().isoformat()
+                'recorded_at': datetime.now().isoformat(),
+                'num_landmarks_per_hand': self.NUM_HAND_LANDMARKS,
+                'format_version': '1.0'
             }
         }
         

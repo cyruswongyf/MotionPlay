@@ -26,11 +26,13 @@ mediapipe:
 recognition:
   confidence_threshold: 0.7 # Minimum confidence for detection (0.0-1.0)
   cooldown_ms: 500 # Cooldown between detections (milliseconds)
+  debounce_time: 0.8 # Debounce time for same gesture (seconds)
 
 # Profile settings
 profiles:
-  default_profile: default # Profile to load on startup
+  default_profile: fighting_game # Profile to load on startup
   profile_dir: profiles # Directory containing profile YAML files
+  enable_hot_reload: true # Watch for profile file changes
 
 # Recording settings
 recording:

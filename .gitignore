@@ -27,8 +27,11 @@ ENV/
 .AppleDouble
 .LSOverride
 
-# Models (too large for git)
+# Models (too large for git, auto-downloaded)
 models/*.task
+
+# But allow custom trained models to be committed if needed
+!models/custom_*.task
 
 # Recordings
 assets/recordings/*.json

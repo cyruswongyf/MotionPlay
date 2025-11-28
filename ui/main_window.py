@@ -20,42 +20,70 @@ logger = logging.getLogger(__name__)
 
 
 class TriggerOverlay(QWidget):
-    """Semi-transparent overlay for motion trigger feedback."""
+    """Aggressive overlay for motion trigger feedback - pro gaming style."""
     
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
         self.setStyleSheet(f"""
-            background-color: rgba(0, 0, 0, 120);
+            background-color: rgba(0, 0, 0, 150);
+            border: 4px solid {COLORS['RED_BRIGHT']};
         """)
         
         layout = QVBoxLayout(self)
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.setSpacing(15)
         
+        # Motion name label - BIG and aggressive
         self.motion_label = QLabel()
         self.motion_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.motion_label.setFont(QFont("Arial", 80, QFont.Weight.Bold))
-        self.motion_label.setStyleSheet(f"color: {COLORS['RED_PRIMARY']};")
+        self.motion_label.setFont(QFont("Arial", 100, QFont.Weight.Bold))
+        self.motion_label.setStyleSheet(f"""
+            color: {COLORS['RED_BRIGHT']};
+            text-shadow: 0 0 20px {COLORS['RED_GLOW']};
+            letter-spacing: 8px;
+        """)
         layout.addWidget(self.motion_label)
         
+        # Arrow
+        arrow_label = QLabel("→")
+        arrow_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        arrow_label.setFont(QFont("Arial", 60, QFont.Weight.Bold))
+        arrow_label.setStyleSheet(f"color: {COLORS['WHITE']};")
+        layout.addWidget(arrow_label)
+        
+        # Key label - clear and prominent
         self.key_label = QLabel()
         self.key_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.key_label.setFont(QFont("Arial", 60, QFont.Weight.Bold))
-        self.key_label.setStyleSheet(f"color: {COLORS['RED_LIGHT']};")
+        self.key_label.setFont(QFont("Arial", 80, QFont.Weight.Bold))
+        self.key_label.setStyleSheet(f"""
+            color: {COLORS['WHITE']};
+            background-color: {COLORS['RED_PRIMARY']};
+            padding: 20px 40px;
+            border-radius: 15px;
+            border: 3px solid {COLORS['RED_BRIGHT']};
+        """)
         layout.addWidget(self.key_label)
         
         self.hide()
         self.hide_timer = QTimer()
         self.hide_timer.setSingleShot(True)
         self.hide_timer.timeout.connect(self.hide)
+        
+        # Fade out animation effect (optional enhancement)
+        self.opacity = 1.0
     
     def show_feedback(self, motion: str, key: str):
-        """Show trigger feedback."""
-        self.motion_label.setText(motion.upper())
-        self.key_label.setText(f"→ {key.upper()}")
+        """Show trigger feedback with aggressive styling."""
+        self.motion_label.setText(motion.upper().replace('_', ' '))
+        self.key_label.setText(key.upper())
+        self.setStyleSheet(f"""
+            background-color: rgba(0, 0, 0, 150);
+            border: 4px solid {COLORS['RED_BRIGHT']};
+        """)
         self.show()
         self.raise_()
-        self.hide_timer.start(600)
+        self.hide_timer.start(800)  # Show for 800ms as specified
 
 
 class MotionPlayMainWindow(QMainWindow):
@@ -151,31 +179,50 @@ class MotionPlayMainWindow(QMainWindow):
         motion_label.setFont(QFont("Arial", 12))
         layout.addWidget(motion_label)
         
-        self.motion_name = QLabel("NONE")
+        self.motion_name = QLabel("READY")
         self.motion_name.setObjectName("motion_name")
         self.motion_name.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.motion_name.setFont(QFont("Arial", 52, QFont.Weight.Bold))
+        self.motion_name.setFont(QFont("Arial", 48, QFont.Weight.Bold))
         self.motion_name.setMinimumHeight(100)
+        self.motion_name.setStyleSheet(f"""
+            color: {COLORS['RED_BRIGHT']};
+            background-color: rgba(255, 26, 26, 20);
+            border: 2px solid {COLORS['RED_PRIMARY']};
+            border-radius: 10px;
+            padding: 10px;
+            letter-spacing: 4px;
+        """)
         layout.addWidget(self.motion_name)
         
-        # Triggers
+        # Triggers - aggressive display
         trigger_container = QWidget()
-        trigger_layout = QHBoxLayout(trigger_container)
+        trigger_layout = QVBoxLayout(trigger_container)
         trigger_layout.setContentsMargins(0, 10, 0, 10)
+        trigger_layout.setSpacing(5)
         
-        trigger_label = QLabel("Triggers →")
+        trigger_label = QLabel("⚡ TRIGGERS")
         trigger_label.setObjectName("triggerLabel")
-        trigger_label.setFont(QFont("Arial", 18))
+        trigger_label.setFont(QFont("Arial", 14, QFont.Weight.Bold))
+        trigger_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        trigger_label.setStyleSheet(f"color: {COLORS['WHITE']};")
         trigger_layout.addWidget(trigger_label)
         
         self.key_action = QLabel("--")
         self.key_action.setObjectName("key_action")
-        self.key_action.setFont(QFont("Arial", 40, QFont.Weight.Bold))
+        self.key_action.setFont(QFont("Arial", 44, QFont.Weight.Bold))
+        self.key_action.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.key_action.setMinimumHeight(70)
+        self.key_action.setStyleSheet(f"""
+            color: {COLORS['WHITE']};
+            background-color: {COLORS['RED_PRIMARY']};
+            border: 3px solid {COLORS['RED_BRIGHT']};
+            border-radius: 12px;
+            padding: 10px;
+        """)
         trigger_layout.addWidget(self.key_action)
-        trigger_layout.addStretch()
         
         layout.addWidget(trigger_container)
-        layout.addSpacing(10)
+        layout.addSpacing(15)
         
         # Profile selector
         profile_label = QLabel("Combat Profile:")
@@ -245,9 +292,29 @@ class MotionPlayMainWindow(QMainWindow):
         self.camera_label.setPixmap(scaled)
     
     def update_motion(self, motion: str, key: str):
-        """Update detected motion display."""
-        self.motion_name.setText(motion.upper())
+        """Update detected motion display with aggressive styling."""
+        self.motion_name.setText(motion.upper().replace('_', ' '))
         self.key_action.setText(key.upper())
+        
+        # Flash effect - brief highlight on trigger
+        self.motion_name.setStyleSheet(f"""
+            color: {COLORS['WHITE']};
+            background-color: {COLORS['RED_BRIGHT']};
+            border: 3px solid {COLORS['RED_GLOW']};
+            border-radius: 10px;
+            padding: 10px;
+            letter-spacing: 4px;
+        """)
+        
+        # Reset after brief flash
+        QTimer.singleShot(300, lambda: self.motion_name.setStyleSheet(f"""
+            color: {COLORS['RED_BRIGHT']};
+            background-color: rgba(255, 26, 26, 20);
+            border: 2px solid {COLORS['RED_PRIMARY']};
+            border-radius: 10px;
+            padding: 10px;
+            letter-spacing: 4px;
+        """))
     
     def show_trigger_feedback(self, motion: str, key: str):
         """Show trigger feedback overlay."""
@@ -257,7 +324,7 @@ class MotionPlayMainWindow(QMainWindow):
     def update_fps(self, fps: int):
         """Update FPS display."""
         self.current_fps = fps
-        self.status_bar.setText(f"Profile: {self.current_profile} │ FPS: {fps}")
+        self.status_bar.setText(f"🎮 {self.current_profile.upper()} │ FPS: {fps} │ READY")
     
     def set_profiles(self, profiles: list):
         """Set available profiles."""

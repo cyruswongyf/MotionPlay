@@ -5,33 +5,31 @@ name: fighting_game
 
 # Fighting game motion mappings
 # Designed for classic special moves and combos
+# Optimized for Street Fighter, Tekken, Mortal Kombat
 
 mappings:
-  # Punches
+  # Basic Attacks
   Fist: j # Light punch
   Open_Palm: k # Heavy punch
-
-  # Kicks
   Victory: l # Light kick
-  Thumb_Up: semicolon # Heavy kick
+  Pointing_Up_Thumb: i # Heavy kick
 
-  # Special moves
+  # Special Moves (custom trained gestures)
   Hadouken: space # Fireball/Projectile
   Shoryuken: shift # Dragon punch/Anti-air
-  Tatsumaki: ctrl # Hurricane kick/Spin
 
-  # Directional inputs
-  Pointing_Up: up # Jump
-  Pointing_Down: down # Crouch
-  Pointing_Left: left # Move left
-  Pointing_Right: right # Move right
+  # Movement
+  Thumb_Up: w # Jump forward
+  Thumb_Down: s # Crouch/Block low
+  Pointing_Left: a # Move/Dash left
+  Pointing_Right: d # Move/Dash right
 
-  # System actions
-  Thumb_Down: esc # Pause/Menu
-  Peace: enter # Confirm/Start
+  # Advanced Actions
+  Two_Fingers: g # Grab/Throw
+  Three_Fingers: x # EX/Super meter
+  Closed_Fist: backspace # Taunt
+  Peace: enter # Pause
 
-  # Grab/Throw
-  Two_Fingers: g # Grab
-
-  # Super/EX moves
-  Rock: x # Super/EX modifier
+  # Built-in gestures
+  Rock: q # Quick combo 1
+  ILoveYou: e # Quick combo 2

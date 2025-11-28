@@ -8,6 +8,7 @@ import yaml
 import time
 import signal
 import logging
+import argparse
 from pathlib import Path
 from logging.handlers import RotatingFileHandler
 from PyQt6.QtWidgets import QApplication
@@ -91,14 +92,16 @@ class MotionPlayApp:
     Manages camera, processing, recognition, and UI lifecycle.
     """
     
-    def __init__(self, config: dict):
+    def __init__(self, config: dict, offline_mode: bool = False):
         """
         Initialize the application.
         
         Args:
             config: Configuration dict
+            offline_mode: Skip model download checks
         """
         self.config = config
+        self.offline_mode = offline_mode
         self.logger = logging.getLogger(__name__)
         
         # Components
@@ -137,7 +140,8 @@ class MotionPlayApp:
             gesture_model_path=mp_config.get('gesture_model', 'models/gesture_recognizer.task'),
             num_hands=mp_config['num_hands'],
             enable_pose=mp_config['enable_pose'],
-            enable_gestures=mp_config['enable_gestures']
+            enable_gestures=mp_config['enable_gestures'],
+            offline_mode=self.offline_mode
         )
         
         # Recognizer
@@ -149,9 +153,12 @@ class MotionPlayApp:
         
         # Action Mapper
         prof_config = self.config['profiles']
+        rec_config = self.config['recognition']
         self.action_mapper = ActionMapper(
             profile_dir=prof_config['profile_dir'],
-            initial_profile=prof_config['default_profile']
+            initial_profile=prof_config['default_profile'],
+            debounce_time=rec_config.get('debounce_time', 0.8),
+            enable_hot_reload=prof_config.get('enable_hot_reload', True)
         )
     
     def run(self, app: QApplication):
@@ -216,14 +223,15 @@ class MotionPlayApp:
             action = self.action_mapper.get_action(motion)
             
             if action:
-                # Execute action
-                self.action_mapper.execute_action(motion)
+                # Trigger action (with debouncing)
+                triggered = self.action_mapper.trigger_action(motion)
                 
-                # Update UI
-                self.window.update_motion(motion, action)
-                self.window.show_trigger_feedback(motion, action)
-                
-                self.logger.info(f"Motion detected: {motion} → {action} ({confidence:.2f})")
+                if triggered:
+                    # Update UI with aggressive feedback
+                    self.window.update_motion(motion, action)
+                    self.window.show_trigger_feedback(motion, action)
+                    
+                    self.logger.info(f"⚡ Gesture triggered: {motion} → {action} ({confidence:.2f})")
     
     def _on_profile_changed(self, profile_name: str):
         """Handle profile change."""
@@ -245,6 +253,9 @@ class MotionPlayApp:
         if self.processor:
             self.processor.release()
         
+        if self.action_mapper:
+            self.action_mapper.stop_watcher()
+        
         self.logger.info("Shutdown complete")
 
 
@@ -258,6 +269,15 @@ def signal_handler(sig, frame):
 
 def main():
     """Main entry point."""
+    # Parse command-line arguments
+    parser = argparse.ArgumentParser(description='MotionPlay - Pro Gaming Gesture Recognition')
+    parser.add_argument(
+        '--offline',
+        action='store_true',
+        help='Skip model download checks (for air-gapped systems)'
+    )
+    args = parser.parse_args()
+    
     # Load config
     config = load_config()
     
@@ -273,13 +293,16 @@ def main():
     logger.info("MotionPlay - Pro Gaming Gesture Recognition")
     logger.info("=" * 60)
     
+    if args.offline:
+        logger.info("Offline mode enabled - skipping model auto-download")
+    
     try:
         # Create Qt application
         app = QApplication(sys.argv)
         app.setApplicationName("MotionPlay")
         
         # Create and run app
-        motion_app = MotionPlayApp(config)
+        motion_app = MotionPlayApp(config, offline_mode=args.offline)
         exit_code = motion_app.run(app)
         
         # Shutdown

@@ -9,13 +9,16 @@ PyYAML==6.0.1              # YAML configuration files
 
 # Input Control
 pynput==1.7.6              # Keyboard and mouse control
+watchdog==3.0.0            # File system monitoring for hot-reload
 
 # GUI
 PyQt6==6.6.1               # Modern Qt6 GUI framework
 
-# Machine Learning (Optional - for custom classifiers)
-scikit-learn==1.4.0        # ML algorithms
+# Machine Learning (Optional - for custom gesture training)
+scikit-learn==1.4.0        # ML algorithms and preprocessing
+scipy==1.11.4              # Scientific computing and interpolation
 joblib==1.3.2              # Model serialization
+tensorflow==2.15.0         # Deep learning framework for custom model training
 
 # Development Tools (Optional)
 # pandas==2.2.0            # Data analysis for training

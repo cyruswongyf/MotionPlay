@@ -3,38 +3,37 @@
 
 name: moba
 
-# MOBA motion mappings
-# Designed for ability casting, item usage, and camera control
+# MOBA motion mappings - fast ability casting
+# Optimized for League of Legends, Dota 2, Smite
 
 mappings:
-  # Abilities (QWER)
-  Fist: q # Ability 1
-  Open_Palm: w # Ability 2
-  Victory: e # Ability 3
-  Thumb_Up: r # Ultimate ability
+  # Core Abilities (QWER)
+  Fist: q # Ability Q (Primary)
+  Open_Palm: w # Ability W (Secondary)
+  Victory: e # Ability E (Utility)
+  Thumb_Up: r # Ultimate R
 
-  # Items (1-6)
-  One_Finger: 1 # Item slot 1
-  Two_Fingers: 2 # Item slot 2
-  Three_Fingers: 3 # Item slot 3
-  Four_Fingers: 4 # Item slot 4
-  Five_Fingers: 5 # Item slot 5
-  Thumb_Down: 6 # Item slot 6
+  # Summoner Spells / Items
+  Two_Fingers: d # Summoner 1 / Item D
+  Three_Fingers: f # Summoner 2 / Item F
+  Peace: space # Center camera on champion
 
-  # Targeting
-  Pointing: left_click # Target/Move
-  Peace: a # Attack move
-  Rock: s # Stop
+  # Item Actives
+  Pointing_Up_Thumb: 1 # Item slot 1
+  Thumb_Index_Crossed: 2 # Item slot 2
+  Rock: 3 # Item slot 3
 
-  # Camera
-  Swipe_Up: space # Center camera on hero
-  Swipe_Left: f1 # Camera to ally 1
-  Swipe_Right: f2 # Camera to ally 2
+  # Quick Actions
+  Thumb_Down: s # Stop / Hold position
+  Closed_Fist: a # Attack move
+  Pointing_Left: left_click # Left click (targeting)
+  Pointing_Right: shift # Self-cast modifier
 
   # Communication
-  Call_Me: g # Ping
-  Shaka: v # Voice line
+  Shaka: g # Ping
+  ILoveYou: v # Smart ping
+  Palm_Up: y # Chat
 
   # System
-  Palm_Stop: b # Back to base (shop)
-  Thumb_Left: tab # Scoreboard
+  Closed_Fist_Raised: tab # Scoreboard
+  Pointing_Down: b # Recall to base
