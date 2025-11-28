@@ -13,7 +13,8 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal
 from PyQt6.QtGui import QFont, QPixmap, QImage
-from .styles import get_dialog_stylesheet, COLORS
+from .styles.common import COLORS
+from .styles.recording_dialog import RECORDING_DIALOG_STYLESHEET
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +50,7 @@ class RecordingDialog(QDialog):
         self.setModal(True)
         
         self._init_ui()
-        self.setStyleSheet(get_dialog_stylesheet())
+        self.setStyleSheet(RECORDING_DIALOG_STYLESHEET)
         
         # Setup preview timer
         if self.camera and self.processor:
@@ -77,25 +78,14 @@ class RecordingDialog(QDialog):
         self.preview_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.preview_label.setMinimumSize(640, 360)
         self.preview_label.setMaximumSize(640, 360)
-        self.preview_label.setStyleSheet(f"""
-            QLabel {{
-                background-color: {COLORS['DARK_BG']};
-                border: 3px solid {COLORS['RED_PRIMARY']};
-                border-radius: 10px;
-            }}
-        """)
+        self.preview_label.setStyleSheet(f"QLabel {{ background-color: {COLORS['DARK_BG']}; border: 3px solid {COLORS['RED_PRIMARY']}; border-radius: 10px; }}")
         layout.addWidget(self.preview_label, alignment=Qt.AlignmentFlag.AlignCenter)
         
         # Countdown overlay (hidden initially)
         self.countdown_label = QLabel("3")
         self.countdown_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.countdown_label.setFont(QFont("Arial", 120, QFont.Weight.Bold))
-        self.countdown_label.setStyleSheet(f"""
-            color: {COLORS['RED_BRIGHT']};
-            background-color: rgba(0, 0, 0, 180);
-            border-radius: 20px;
-            padding: 20px;
-        """)
+        self.countdown_label.setStyleSheet(f"color: {COLORS['RED_BRIGHT']}; background-color: rgba(0, 0, 0, 180); border-radius: 20px; padding: 20px;")
         self.countdown_label.setMinimumHeight(180)
         self.countdown_label.hide()
         layout.addWidget(self.countdown_label)
@@ -151,19 +141,7 @@ class RecordingDialog(QDialog):
         self.start_btn.setFont(QFont("Arial", 14, QFont.Weight.Bold))
         self.start_btn.setMinimumHeight(60)
         self.start_btn.setMinimumWidth(250)
-        self.start_btn.setStyleSheet(f"""
-            QPushButton {{
-                background-color: {COLORS['RED_PRIMARY']};
-                color: {COLORS['WHITE']};
-                border: 3px solid {COLORS['RED_BRIGHT']};
-                border-radius: 10px;
-                font-weight: bold;
-                letter-spacing: 2px;
-            }}
-            QPushButton:hover {{
-                background-color: {COLORS['RED_BRIGHT']};
-            }}
-        """)
+        self.start_btn.setStyleSheet(f"QPushButton {{ background-color: {COLORS['RED_PRIMARY']}; color: {COLORS['WHITE']}; border: 3px solid {COLORS['RED_BRIGHT']}; border-radius: 10px; font-weight: bold; letter-spacing: 2px; }} QPushButton:hover {{ background-color: {COLORS['RED_BRIGHT']}; }}")
         self.start_btn.clicked.connect(self._start_recording)
         button_layout.addWidget(self.start_btn)
         
@@ -235,21 +213,11 @@ class RecordingDialog(QDialog):
         """Countdown before recording."""
         if value > 0:
             self.countdown_label.setText(str(value))
-            self.countdown_label.setStyleSheet(f"""
-                color: {COLORS['RED_BRIGHT']};
-                background-color: rgba(0, 0, 0, 180);
-                border-radius: 20px;
-                padding: 20px;
-            """)
+            self.countdown_label.setStyleSheet(f"color: {COLORS['RED_BRIGHT']}; background-color: rgba(0, 0, 0, 180); border-radius: 20px; padding: 20px;")
             QTimer.singleShot(1000, lambda: self._countdown(value - 1))
         else:
             self.countdown_label.setText("🔴 RECORDING")
-            self.countdown_label.setStyleSheet(f"""
-                color: {COLORS['WHITE']};
-                background-color: rgba(255, 26, 26, 200);
-                border-radius: 20px;
-                padding: 20px;
-            """)
+            self.countdown_label.setStyleSheet(f"color: {COLORS['WHITE']}; background-color: rgba(255, 26, 26, 200); border-radius: 20px; padding: 20px;")
             self.countdown_active = False
             self.recording = True
             self.instruction.setText("Perform the gesture NOW!")
@@ -329,12 +297,7 @@ class RecordingDialog(QDialog):
         
         self.countdown_label.show()
         self.countdown_label.setText("✅ COMPLETE!")
-        self.countdown_label.setStyleSheet(f"""
-            color: {COLORS['WHITE']};
-            background-color: rgba(0, 200, 0, 200);
-            border-radius: 20px;
-            padding: 20px;
-        """)
+        self.countdown_label.setStyleSheet(f"color: {COLORS['WHITE']}; background-color: rgba(0, 200, 0, 200); border-radius: 20px; padding: 20px;")
         self.instruction.setText(f"🎉 {self.recorded_count} sequences saved successfully!")
         self.instruction.setStyleSheet(f"color: {COLORS['WHITE']};")
         

@@ -234,9 +234,12 @@ class MotionPlayApp:
                     self.logger.info(f"⚡ Gesture triggered: {motion} → {action} ({confidence:.2f})")
     
     def _on_profile_changed(self, profile_name: str):
-        """Handle profile change."""
-        if self.action_mapper.load_profile(profile_name):
-            self.logger.info(f"Profile changed: {profile_name}")
+        """FINAL CHANGE: Handle instant profile change from Profile Manager."""
+        if self.action_mapper.switch_profile(profile_name):
+            self.logger.info(f"⚡ Profile instantly switched: {profile_name}")
+            # Update current profile for main window sync
+            if self.window:
+                self.window.current_profile = profile_name
     
     def shutdown(self):
         """Graceful shutdown."""

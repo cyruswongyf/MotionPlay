@@ -150,12 +150,28 @@ class ActionMapper:
             self.mappings = profile_data.get('mappings', {})
             self.current_profile = profile_name
             
-            logger.info(f"Profile loaded: {profile_name} ({len(self.mappings)} mappings)")
+            logger.info(f"✓ Profile loaded: {profile_name} ({len(self.mappings)} mappings)")
             return True
             
         except Exception as e:
             logger.error(f"Failed to load profile {profile_name}: {e}")
             return False
+    
+    def switch_profile(self, profile_name: str) -> bool:
+        """FINAL CHANGE: Instantly switch to a different profile (for real-time profile manager).
+        
+        Args:
+            profile_name: Name of profile (without .yaml extension)
+            
+        Returns:
+            True if switched successfully, False otherwise
+        """
+        if self.load_profile(profile_name):
+            # Clear debounce on profile switch for immediate response
+            self.clear_debounce()
+            logger.info(f"⚡ Profile switched instantly: {profile_name}")
+            return True
+        return False
     
     def reload_profile(self) -> bool:
         """
