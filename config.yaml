@@ -1,0 +1,73 @@
+# MotionPlay Configuration
+# Global settings for the application
+
+# Camera settings
+camera:
+  device_id: 0 # Camera device ID (0 = default webcam)
+  width: 1280 # Frame width in pixels
+  height: 720 # Frame height in pixels
+  fps: 30 # Target frames per second
+  mirror: true # Mirror flip the camera feed horizontally
+  buffer_size: 1 # OpenCV buffer size (1 = minimal latency)
+
+# MediaPipe settings
+mediapipe:
+  num_hands: 2 # Maximum number of hands to detect (1-2)
+  enable_pose: false # Enable pose detection (body landmarks)
+  enable_gestures: true # Enable gesture recognition
+
+  # Model paths (relative to project root)
+  hand_model: models/hand_landmarker.task
+  pose_model: models/pose_landmarker.task
+  gesture_model: models/gesture_recognizer.task
+  custom_classifier: null # Optional: custom_gesture_recognizer/gesture_classifier.pkl
+
+# Motion recognition settings
+recognition:
+  confidence_threshold: 0.7 # Minimum confidence for detection (0.0-1.0)
+  cooldown_ms: 500 # Cooldown between detections (milliseconds)
+
+# Profile settings
+profiles:
+  default_profile: default # Profile to load on startup
+  profile_dir: profiles # Directory containing profile YAML files
+
+# Recording settings
+recording:
+  output_dir: assets/recordings # Directory to save recorded motions
+  max_frames: 150 # Maximum frames per sequence
+  min_frames: 15 # Minimum frames for valid recording
+  format: json # Output format: json or npy
+
+# UI settings
+ui:
+  window_width: 1400 # Main window width
+  window_height: 820 # Main window height
+  camera_width: 980 # Camera feed width
+  camera_height: 820 # Camera feed height
+
+  # Theme colors (Pure Black + Aggressive Red)
+  theme:
+    bg_black: "#0d0d0d"
+    pure_black: "#000000"
+    red_primary: "#ff1a1a"
+    red_bright: "#ff3333"
+    red_dark: "#cc0000"
+    red_glow: "#ff0000"
+    white: "#ffffff"
+    gray: "#333333"
+
+  # Overlay settings
+  overlay:
+    show_fps: true # Show FPS counter
+    show_landmarks: true # Draw hand landmarks on camera feed
+    trigger_feedback: true # Show motion trigger overlay
+    feedback_duration_ms: 600 # How long to show trigger feedback
+
+# Logging settings
+logging:
+  level: INFO # Logging level: DEBUG, INFO, WARNING, ERROR, CRITICAL
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: logs/motionplay.log # Log file path (null = console only)
+  max_bytes: 10485760 # Max log file size (10MB)
+  backup_count: 3 # Number of backup log files

@@ -1,0 +1,38 @@
+# MotionPlay Profile: Racing
+# Optimized for racing games (Forza, Gran Turismo, Need for Speed, etc.)
+
+name: racing
+
+# Racing motion mappings
+# Designed for throttle, brake, steering, and gear shifting
+
+mappings:
+  # Throttle & Brake
+  Thumb_Up: w # Accelerate
+  Thumb_Down: s # Brake/Reverse
+
+  # Steering
+  Pointing_Left: a # Steer left
+  Pointing_Right: d # Steer right
+
+  # Handbrake & Boost
+  Fist: space # Handbrake/E-brake
+  Open_Palm: shift # Nitro/Boost
+
+  # Gear shifting
+  Victory: e # Shift up
+  Peace: q # Shift down
+
+  # Camera views
+  Two_Fingers: c # Change camera
+  Three_Fingers: v # Rear view
+
+  # Auxiliary
+  Rock: r # Reset car
+  Shaka: h # Horn
+  Call_Me: l # Headlights
+
+  # System
+  Palm_Stop: esc # Pause/Menu
+  Thumb_Left: tab # Leaderboard
+  Thumb_Right: m # Map

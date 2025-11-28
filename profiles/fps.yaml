@@ -1,0 +1,37 @@
+# MotionPlay Profile: FPS (First-Person Shooter)
+# Optimized for FPS games (CS:GO, Valorant, Call of Duty, etc.)
+
+name: fps
+
+# FPS motion mappings
+# Designed for quick weapon switching, reloading, and tactical actions
+
+mappings:
+  # Movement (WASD)
+  Pointing_Up: w # Move forward
+  Pointing_Down: s # Move backward
+  Pointing_Left: a # Strafe left
+  Pointing_Right: d # Strafe right
+
+  # Actions
+  Fist: left_click # Fire weapon
+  Open_Palm: right_click # Aim down sights
+  Victory: space # Jump
+  Thumb_Down: ctrl # Crouch
+
+  # Weapon management
+  Thumb_Up: r # Reload
+  Peace: 1 # Primary weapon
+  Two_Fingers: 2 # Secondary weapon
+  Three_Fingers: 3 # Melee weapon
+
+  # Tactical
+  Rock: e # Use/Interact
+  Pointing: q # Ability/Grenade
+
+  # System
+  Swipe_Left: tab # Scoreboard
+  Swipe_Right: esc # Menu
+
+  # Communication
+  Call_Me: z # Voice chat (push to talk)

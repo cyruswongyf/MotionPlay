@@ -1,0 +1,40 @@
+# MotionPlay Profile: MOBA (Multiplayer Online Battle Arena)
+# Optimized for MOBA games (League of Legends, Dota 2, etc.)
+
+name: moba
+
+# MOBA motion mappings
+# Designed for ability casting, item usage, and camera control
+
+mappings:
+  # Abilities (QWER)
+  Fist: q # Ability 1
+  Open_Palm: w # Ability 2
+  Victory: e # Ability 3
+  Thumb_Up: r # Ultimate ability
+
+  # Items (1-6)
+  One_Finger: 1 # Item slot 1
+  Two_Fingers: 2 # Item slot 2
+  Three_Fingers: 3 # Item slot 3
+  Four_Fingers: 4 # Item slot 4
+  Five_Fingers: 5 # Item slot 5
+  Thumb_Down: 6 # Item slot 6
+
+  # Targeting
+  Pointing: left_click # Target/Move
+  Peace: a # Attack move
+  Rock: s # Stop
+
+  # Camera
+  Swipe_Up: space # Center camera on hero
+  Swipe_Left: f1 # Camera to ally 1
+  Swipe_Right: f2 # Camera to ally 2
+
+  # Communication
+  Call_Me: g # Ping
+  Shaka: v # Voice line
+
+  # System
+  Palm_Stop: b # Back to base (shop)
+  Thumb_Left: tab # Scoreboard

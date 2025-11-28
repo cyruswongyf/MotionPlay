@@ -1,0 +1,37 @@
+# MotionPlay Profile: Fighting Game
+# Optimized for 2D/3D fighting games (Street Fighter, Tekken, Mortal Kombat, etc.)
+
+name: fighting_game
+
+# Fighting game motion mappings
+# Designed for classic special moves and combos
+
+mappings:
+  # Punches
+  Fist: j # Light punch
+  Open_Palm: k # Heavy punch
+
+  # Kicks
+  Victory: l # Light kick
+  Thumb_Up: semicolon # Heavy kick
+
+  # Special moves
+  Hadouken: space # Fireball/Projectile
+  Shoryuken: shift # Dragon punch/Anti-air
+  Tatsumaki: ctrl # Hurricane kick/Spin
+
+  # Directional inputs
+  Pointing_Up: up # Jump
+  Pointing_Down: down # Crouch
+  Pointing_Left: left # Move left
+  Pointing_Right: right # Move right
+
+  # System actions
+  Thumb_Down: esc # Pause/Menu
+  Peace: enter # Confirm/Start
+
+  # Grab/Throw
+  Two_Fingers: g # Grab
+
+  # Super/EX moves
+  Rock: x # Super/EX modifier

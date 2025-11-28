@@ -7,9 +7,11 @@ __pycache__/
 *.egg-info/
 dist/
 build/
+*.spec
 
 # Virtual Environment
 venv/
+.venv/
 env/
 ENV/
 
@@ -22,9 +24,21 @@ ENV/
 
 # macOS
 .DS_Store
+.AppleDouble
+.LSOverride
 
-# Models
+# Models (too large for git)
 models/*.task
 
+# Recordings
+assets/recordings/*.json
+assets/recordings/*.npy
+
 # Logs
+logs/
 *.log
+
+# Temporary
+*.tmp
+*.bak
+.cache/

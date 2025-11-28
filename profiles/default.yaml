@@ -1,0 +1,31 @@
+# MotionPlay Profile: Default
+# General-purpose gesture controls for everyday use
+
+name: default
+
+# Motion to keyboard/mouse mappings
+# Format: motion_name: key_or_action
+#
+# Supported actions:
+#   - Single characters: a, b, c, 1, 2, 3, etc.
+#   - Special keys: space, enter, tab, backspace, shift, ctrl, alt, esc, up, down, left, right
+#   - Mouse: left_click, right_click, middle_click
+#   - Strings: Any multi-character string will be typed out
+
+mappings:
+  # Basic gestures
+  Fist: space
+  Open_Palm: left_click
+  Victory: w
+  Thumb_Up: e
+  Thumb_Down: q
+
+  # Additional gestures (if trained)
+  Pointing_Up: up
+  Pointing_Down: down
+  Pointing_Left: left
+  Pointing_Right: right
+
+  # Custom gestures
+  # Peace: enter
+  # Rock: backspace
