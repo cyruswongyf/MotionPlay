@@ -1,71 +1,33 @@
-# MotionPlay 🎮👊🔥
+# MotionPlay
 
-**Punch the air. Control your game. Zero lag.**
+**Gesture-to-Keyboard Controller for Gaming**
 
-![Python](https://img.shields.io/badge/python-3.8+-ff1a1a?style=flat-square) ![License](https://img.shields.io/badge/license-MIT-red?style=flat-square) ![Stars](https://img.shields.io/github/stars/cyruswongyf/MotionPlay?style=flat-square&color=ff1a1a)
+Control games with hand gestures using real-time MediaPipe tracking and customizable motion profiles.
 
----
-
-## ⚡ Install
+## Quick Start
 
 ```bash
-git clone https://github.com/cyruswongyf/MotionPlay.git
-cd MotionPlay
+git clone https://github.com/cyruswongyf/MotionPlay.git && cd MotionPlay
+python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 python launch.py
 ```
 
-**First run auto-downloads models (~80MB)**
+## Features
 
----
+• Real-time hand and pose tracking  
+• Pre-configured profiles for FPS, Fighting, and Racing games  
+• Record and train your own custom gestures  
+• Instant motion-to-key mapping with zero lag
 
-## 📸 In Action
+## Included Profiles
 
-```
-╔════════════════════════════════════╗
-║  [LIVE CAMERA FEED]                ║
-║                                    ║
-║       👊 PUNCH                     ║
-║       ━━━━━━━━━━━━━━━             ║
-║       ⚡ W                         ║
-║                                    ║
-║  🎮 FIGHTING │ FPS: 30 │ READY     ║
-╚════════════════════════════════════╝
-```
+| Profile      | Game Type            | Core Actions                       |
+| ------------ | -------------------- | ---------------------------------- |
+| **FPS**      | First-Person Shooter | WASD movement, aim, shoot, reload  |
+| **Fighting** | Fighting Games       | Punch, kick, block, special combos |
+| **Racing**   | Racing Games         | Steer, accelerate, brake, drift    |
 
----
+## Add Custom Gestures
 
-## 💥 Features
-
-- 👊 **Air gestures replace keyboard** - Fist → W, Peace → Space, Victory → Jump
-- 🎮 **Built-in game profiles** - Fighting / FPS / Racing / MOBA ready to go
-- 🎬 **Record your own move in 10 seconds** - Click record, punch 5x, done
-- 🔥 **Zero lag real-time feedback** - Black-red overlay flashes on trigger
-
----
-
-## 🎯 Quick Examples
-
-**Fighting Game**: `Fist → J` `Hadouken → Space` `Victory → K`  
-**FPS**: `Fist → Left Click` `Peace → R` `Victory → Space`  
-**Racing**: `Thumb Up → W` `Fist → Space` `Peace → S`
-
----
-
-## 🎓 Add Your Move
-
-1. Click **"RECORD NEW MOTION"** → perform gesture 5x
-2. Edit `profiles/fighting_game.yaml` → `Hadouken: space` → hot-reloads instantly
-
----
-
-## 🛠️ Tech
-
-MediaPipe + PyQt6 + pynput + OpenCV = Pure Python motion control
-
----
-
-## 🔥 Star if you punch the air ⭐
-
-**Built by gamers, for gamers.**  
-Control. Unleashed. 🎮👊
+Click **Record New Gesture** in the UI, perform the motion 5-10 times, then train with `python train_custom_gesture.py`. Recorded data is saved to `assets/recordings/` and can be shared across installations.

@@ -1,11 +1,20 @@
-# Custom Gestures 👊🔥
+# Recordings Directory
 
-**This folder stores your recorded gestures.**
+This folder stores recorded gesture sequences for custom motions.
 
-- Each gesture gets its own subfolder (`punch_forward/`, `swipe_left/`, etc.)
-- Inside: 10–20 JSON files (one per repetition)
-- MotionPlay **auto-detects** new gestures → instantly available
-- Share entire folders with friends 🤝
-- Future: cloud sharing coming soon ☁️
+## Structure
 
-Record in 10 seconds → use in your game immediately. Zero hassle.
+Each gesture has its own subdirectory containing multiple JSON files, one per repetition:
+
+```
+recordings/
+├── punch_forward/
+│   ├── recording_1.json
+│   └── recording_2.json
+└── swipe_left/
+    └── recording_1.json
+```
+
+MotionPlay automatically detects new gestures in this folder when you launch the application. You can share entire gesture folders with others by copying the subdirectories.
+
+These recordings are used for training custom gesture recognizer models with `train_custom_gesture.py`.
