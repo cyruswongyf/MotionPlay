@@ -294,7 +294,7 @@ class MediaPipeProcessor:
                 for landmark in hand_landmarks:
                     x = int(landmark.x * frame.shape[1])
                     y = int(landmark.y * frame.shape[0])
-                    cv2.circle(annotated, (x, y), 3, (0, 255, 0), -1)
+                    cv2.circle(annotated, (x, y), 3, (255, 255, 180), -1)
         
         return annotated
     
