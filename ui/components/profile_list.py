@@ -8,11 +8,12 @@ import shutil
 from pathlib import Path
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-    QListWidget, QInputDialog, QMessageBox, QFileDialog
+    QListWidget, QInputDialog, QMessageBox, QFileDialog, QDialog
 )
 from PyQt6.QtCore import Qt, pyqtSignal
-from PyQt6.QtGui import QFont
+from PyQt6.QtGui import QFont, QColor
 from ..styles.common import COLORS
+from ..utils import dark_input_dialog, dark_message_box
 
 logger = logging.getLogger(__name__)
 
@@ -123,8 +124,11 @@ class ProfileListWidget(QWidget):
     
     def _create_profile(self):
         """Create a new profile."""
-        name, ok = QInputDialog.getText(self, "New Profile", "Enter profile name:")
-        if not ok or not name:
+        dialog = dark_input_dialog(self, "New Profile", "Enter profile name:")
+        if dialog.exec() != QDialog.DialogCode.Accepted:
+            return
+        name = dialog.textValue()
+        if not name:
             return
         
         name = name.strip()
@@ -134,7 +138,9 @@ class ProfileListWidget(QWidget):
         profile_path = self.profile_dir / name
         
         if profile_path.exists():
-            QMessageBox.warning(self, "Error", f"Profile '{name}' already exists!")
+            msg = dark_message_box(self, "Error", f"Profile '{name}' already exists!", 
+                                   QMessageBox.StandardButton.Ok, QMessageBox.Icon.Warning)
+            msg.exec()
             return
         
         try:
@@ -159,23 +165,27 @@ class ProfileListWidget(QWidget):
         
         except Exception as e:
             logger.error(f"Failed to create profile: {e}")
-            QMessageBox.critical(self, "Error", f"Failed to create profile:\n{e}")
+            msg = dark_message_box(self, "Error", f"Failed to create profile:\n{e}",
+                                   QMessageBox.StandardButton.Ok, QMessageBox.Icon.Critical)
+            msg.exec()
     
     def _duplicate_profile(self):
         """Duplicate selected profile."""
         current = self.get_current_profile()
         if not current:
-            QMessageBox.warning(self, "Warning", "No profile selected!")
+            msg = dark_message_box(self, "Warning", "No profile selected!",
+                                   QMessageBox.StandardButton.Ok, QMessageBox.Icon.Warning)
+            msg.exec()
             return
         
         base_name = current.replace('.yaml', '')
-        new_name, ok = QInputDialog.getText(
-            self, "Duplicate Profile",
-            f"Enter name for copy of '{base_name}':",
-            text=f"{base_name}_copy"
-        )
-        
-        if not ok or not new_name:
+        dialog = dark_input_dialog(self, "Duplicate Profile",
+                                   f"Enter name for copy of '{base_name}':",
+                                   f"{base_name}_copy")
+        if dialog.exec() != QDialog.DialogCode.Accepted:
+            return
+        new_name = dialog.textValue()
+        if not new_name:
             return
         
         new_name = new_name.strip()
@@ -186,7 +196,9 @@ class ProfileListWidget(QWidget):
         dst_path = self.profile_dir / new_name
         
         if dst_path.exists():
-            QMessageBox.warning(self, "Error", f"Profile '{new_name}' already exists!")
+            msg = dark_message_box(self, "Error", f"Profile '{new_name}' already exists!",
+                                   QMessageBox.StandardButton.Ok, QMessageBox.Icon.Warning)
+            msg.exec()
             return
         
         try:
@@ -208,23 +220,27 @@ class ProfileListWidget(QWidget):
         
         except Exception as e:
             logger.error(f"Failed to duplicate profile: {e}")
-            QMessageBox.critical(self, "Error", f"Failed to duplicate profile:\n{e}")
+            msg = dark_message_box(self, "Error", f"Failed to duplicate profile:\n{e}",
+                                   QMessageBox.StandardButton.Ok, QMessageBox.Icon.Critical)
+            msg.exec()
     
     def _rename_profile(self):
         """Rename selected profile."""
         current = self.get_current_profile()
         if not current:
-            QMessageBox.warning(self, "Warning", "No profile selected!")
+            msg = dark_message_box(self, "Warning", "No profile selected!",
+                                   QMessageBox.StandardButton.Ok, QMessageBox.Icon.Warning)
+            msg.exec()
             return
         
         base_name = current.replace('.yaml', '')
-        new_name, ok = QInputDialog.getText(
-            self, "Rename Profile",
-            "Enter new profile name:",
-            text=base_name
-        )
-        
-        if not ok or not new_name:
+        dialog = dark_input_dialog(self, "Rename Profile",
+                                   "Enter new profile name:",
+                                   base_name)
+        if dialog.exec() != QDialog.DialogCode.Accepted:
+            return
+        new_name = dialog.textValue()
+        if not new_name:
             return
         
         new_name = new_name.strip()
@@ -238,7 +254,9 @@ class ProfileListWidget(QWidget):
         new_path = self.profile_dir / new_name
         
         if new_path.exists():
-            QMessageBox.warning(self, "Error", f"Profile '{new_name}' already exists!")
+            msg = dark_message_box(self, "Error", f"Profile '{new_name}' already exists!",
+                                   QMessageBox.StandardButton.Ok, QMessageBox.Icon.Warning)
+            msg.exec()
             return
         
         try:
@@ -267,22 +285,25 @@ class ProfileListWidget(QWidget):
         
         except Exception as e:
             logger.error(f"Failed to rename profile: {e}")
-            QMessageBox.critical(self, "Error", f"Failed to rename profile:\n{e}")
+            msg = dark_message_box(self, "Error", f"Failed to rename profile:\n{e}",
+                                   QMessageBox.StandardButton.Ok, QMessageBox.Icon.Critical)
+            msg.exec()
     
     def _delete_profile(self):
         """Delete selected profile."""
         current = self.get_current_profile()
         if not current:
-            QMessageBox.warning(self, "Warning", "No profile selected!")
+            msg = dark_message_box(self, "Warning", "No profile selected!",
+                                   QMessageBox.StandardButton.Ok, QMessageBox.Icon.Warning)
+            msg.exec()
             return
         
-        reply = QMessageBox.question(
-            self, "Delete Profile",
-            f"Are you sure you want to delete '{current}'?",
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
-        )
+        msg = dark_message_box(self, "Delete Profile",
+                               f"Are you sure you want to delete '{current}'?",
+                               QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                               QMessageBox.Icon.Question)
         
-        if reply == QMessageBox.StandardButton.Yes:
+        if msg.exec() == QMessageBox.StandardButton.Yes:
             try:
                 profile_path = self.profile_dir / current
                 profile_path.unlink()
@@ -295,15 +316,34 @@ class ProfileListWidget(QWidget):
             
             except Exception as e:
                 logger.error(f"Failed to delete profile: {e}")
-                QMessageBox.critical(self, "Error", f"Failed to delete profile:\n{e}")
+                msg = dark_message_box(self, "Error", f"Failed to delete profile:\n{e}",
+                                       QMessageBox.StandardButton.Ok, QMessageBox.Icon.Critical)
+                msg.exec()
     
     def _import_profile(self):
         """Import profile from external .yaml file."""
-        file_path, _ = QFileDialog.getOpenFileName(
-            self, "Import Profile",
-            str(Path.home()),
-            "YAML Files (*.yaml *.yml)"
-        )
+        dialog = QFileDialog(self)
+        dialog.setWindowTitle("Import Profile")
+        dialog.setDirectory(str(Path.home()))
+        dialog.setNameFilter("YAML Files (*.yaml *.yml)")
+        dialog.setFileMode(QFileDialog.FileMode.ExistingFile)
+        dialog.setStyleSheet("""
+            QFileDialog { background-color: #0d0d0d; color: white; }
+            QLabel { color: white; }
+            QLineEdit { background-color: #1a1a1a; color: white; border: 2px solid #ff1a1a; }
+            QPushButton { background-color: #1a1a1a; color: white; border: 2px solid #ff1a1a; padding: 6px; }
+            QPushButton:hover { background-color: #ff1a1a; color: black; }
+            QTreeView, QListView { background-color: #1a1a1a; color: white; }
+        """)
+        
+        if dialog.exec() != QDialog.DialogCode.Accepted:
+            return
+        
+        selected_files = dialog.selectedFiles()
+        if not selected_files:
+            return
+        
+        file_path = selected_files[0]
         
         if not file_path:
             return
@@ -312,12 +352,11 @@ class ProfileListWidget(QWidget):
         dst_path = self.profile_dir / src_path.name
         
         if dst_path.exists():
-            reply = QMessageBox.question(
-                self, "Profile Exists",
-                f"Profile '{src_path.name}' already exists. Overwrite?",
-                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
-            )
-            if reply == QMessageBox.StandardButton.No:
+            msg = dark_message_box(self, "Profile Exists",
+                                   f"Profile '{src_path.name}' already exists. Overwrite?",
+                                   QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                                   QMessageBox.Icon.Question)
+            if msg.exec() == QMessageBox.StandardButton.No:
                 return
         
         try:
@@ -335,24 +374,48 @@ class ProfileListWidget(QWidget):
                     break
             
             logger.info(f"Imported profile: {src_path.name}")
-            QMessageBox.information(self, "Success", f"Profile '{src_path.name}' imported successfully!")
+            msg = dark_message_box(self, "Success", f"Profile '{src_path.name}' imported successfully!",
+                                   QMessageBox.StandardButton.Ok, QMessageBox.Icon.Information)
+            msg.exec()
         
         except Exception as e:
             logger.error(f"Failed to import profile: {e}")
-            QMessageBox.critical(self, "Error", f"Failed to import profile:\n{e}")
+            msg = dark_message_box(self, "Error", f"Failed to import profile:\n{e}",
+                                   QMessageBox.StandardButton.Ok, QMessageBox.Icon.Critical)
+            msg.exec()
     
     def _export_profile(self):
         """Export current profile to external location."""
         current = self.get_current_profile()
         if not current:
-            QMessageBox.warning(self, "Warning", "No profile selected!")
+            msg = dark_message_box(self, "Warning", "No profile selected!",
+                                   QMessageBox.StandardButton.Ok, QMessageBox.Icon.Warning)
+            msg.exec()
             return
         
-        file_path, _ = QFileDialog.getSaveFileName(
-            self, "Export Profile",
-            str(Path.home() / current),
-            "YAML Files (*.yaml *.yml)"
-        )
+        dialog = QFileDialog(self)
+        dialog.setWindowTitle("Export Profile")
+        dialog.setDirectory(str(Path.home()))
+        dialog.selectFile(current)
+        dialog.setNameFilter("YAML Files (*.yaml *.yml)")
+        dialog.setAcceptMode(QFileDialog.AcceptMode.AcceptSave)
+        dialog.setStyleSheet("""
+            QFileDialog { background-color: #0d0d0d; color: white; }
+            QLabel { color: white; }
+            QLineEdit { background-color: #1a1a1a; color: white; border: 2px solid #ff1a1a; }
+            QPushButton { background-color: #1a1a1a; color: white; border: 2px solid #ff1a1a; padding: 6px; }
+            QPushButton:hover { background-color: #ff1a1a; color: black; }
+            QTreeView, QListView { background-color: #1a1a1a; color: white; }
+        """)
+        
+        if dialog.exec() != QDialog.DialogCode.Accepted:
+            return
+        
+        selected_files = dialog.selectedFiles()
+        if not selected_files:
+            return
+        
+        file_path = selected_files[0]
         
         if not file_path:
             return
@@ -363,8 +426,12 @@ class ProfileListWidget(QWidget):
             shutil.copy2(src_path, dst_path)
             
             logger.info(f"Exported profile: {current} → {dst_path}")
-            QMessageBox.information(self, "Success", f"Profile exported to:\n{dst_path}")
+            msg = dark_message_box(self, "Success", f"Profile exported to:\n{dst_path}",
+                                   QMessageBox.StandardButton.Ok, QMessageBox.Icon.Information)
+            msg.exec()
         
         except Exception as e:
             logger.error(f"Failed to export profile: {e}")
-            QMessageBox.critical(self, "Error", f"Failed to export profile:\n{e}")
+            msg = dark_message_box(self, "Error", f"Failed to export profile:\n{e}",
+                                   QMessageBox.StandardButton.Ok, QMessageBox.Icon.Critical)
+            msg.exec()
