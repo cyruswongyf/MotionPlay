@@ -1,6 +1,6 @@
 """
-Motion Edit Dialog — MotionPlay v3.0 FINAL RECKONING
-Simple, beautiful, no bugs. Complete redesign.
+Motion Edit Dialog for MotionPlay
+Simple motion editor with inline editing.
 """
 
 import json

@@ -1,8 +1,6 @@
 """
 Motion Recorder for MotionPlay
 Records motion sequences and saves them for training.
-Includes normalization and resampling for MediaPipe Model Maker compatibility.
-Pure logic - no UI dependencies.
 """
 
 import json
@@ -59,7 +57,6 @@ class MotionRecorder:
         self.min_frames = min_frames
         self.normalize = normalize
         
-        # Recording state
         self.recording = False
         self.current_motion_name: Optional[str] = None
         self.recorded_frames: List[Dict[str, Any]] = []

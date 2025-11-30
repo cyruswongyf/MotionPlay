@@ -1,7 +1,6 @@
 """
 MotionPlay Core Package
-Pure logic for camera, MediaPipe processing, motion recognition, and action mapping.
-No UI dependencies.
+Core logic without UI dependencies.
 """
 
 from .camera import Camera

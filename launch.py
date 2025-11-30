@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 """
 MotionPlay Quick Launcher
-Professional, simplified launcher for v3.1
-
-Checks dependencies and starts the application with proper theming.
+Checks dependencies and starts the application.
 """
 
 import sys
@@ -83,7 +81,7 @@ def check_config():
 def main():
     """Main launcher"""
     parser = argparse.ArgumentParser(
-        description='MotionPlay v3.1 - Pro Gaming Gesture Recognition System',
+        description='MotionPlay - Gaming Gesture Recognition System',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -127,7 +125,7 @@ Examples:
             return 1
     
     print("=" * 60)
-    print("MotionPlay v3.1 Quick Launcher")
+    print("MotionPlay Quick Launcher")
     print("=" * 60)
     print()
     

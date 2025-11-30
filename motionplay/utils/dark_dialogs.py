@@ -15,13 +15,8 @@ from ..styles.colors import BLACK, WHITE, RED, RED_PRIMARY, RED_BRIGHT, GRAY, IN
 
 
 class BlackWindow:
-    """
-    Nuclear black background mixin.
-    This is the ONLY method that never fails.
-    Works on Windows, macOS, Linux — no exceptions.
-    """
+    """Nuclear black background mixin."""
     def __init__(self):
-        # QUAD-KILL approach: stylesheet + autofill + palette + splitter fix
         nuclear_stylesheet = f"""
             QDialog, QWidget {{ 
                 background-color: {BLACK}; 

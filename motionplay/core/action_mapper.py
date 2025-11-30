@@ -1,8 +1,6 @@
 """
 Action Mapper for MotionPlay
 Maps detected motions to keyboard/mouse actions using profiles.
-Supports hot-reloading, debouncing, and runtime profile switching.
-Pure logic - no UI dependencies.
 """
 
 import yaml
@@ -30,7 +28,6 @@ class ProfileWatcher(FileSystemEventHandler):
         if event.is_directory:
             return
         
-        # Check if it's the current profile file
         if event.src_path.endswith(f"{self.action_mapper.current_profile}.yaml"):
             logger.info(f"Profile file modified, hot-reloading: {self.action_mapper.current_profile}")
             self.action_mapper.reload_profile()

@@ -1,6 +1,5 @@
 """
 Main Window for MotionPlay
-Clean, modern main window with camera feed and control panel.
 """
 
 import cv2
@@ -23,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 class TriggerOverlay(QWidget):
-    """Aggressive overlay for motion trigger feedback - pro gaming style."""
+    """Overlay for motion trigger feedback."""
     
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -60,7 +59,6 @@ class TriggerOverlay(QWidget):
         self.hide_timer.setSingleShot(True)
         self.hide_timer.timeout.connect(self.hide)
         
-        # Fade out animation effect (optional enhancement)
         self.opacity = 1.0
     
     def show_feedback(self, motion: str, key: str):
@@ -74,10 +72,7 @@ class TriggerOverlay(QWidget):
 
 
 class MotionPlayMainWindow(BlackMainWindow):
-    """
-    Main application window.
-    Pure black + aggressive red theme.
-    """
+    """Main application window."""
     
     motion_detected = pyqtSignal(str, str)  # motion_name, key_action
     profile_changed = pyqtSignal(str)  # profile_name
@@ -88,7 +83,6 @@ class MotionPlayMainWindow(BlackMainWindow):
         self.config = config
         self.current_profile = config['profiles']['default_profile']
         
-        # Setup window
         ui_config = config['ui']
         self.setWindowTitle("MotionPlay")
         self.setFixedSize(ui_config['window_width'], ui_config['window_height'])

@@ -1,6 +1,6 @@
 """
-Motion Library Dialog — MotionPlay v3.0 FINAL FORM
-Professional motion library with sidebar filters, responsive grid, and floating actions.
+Motion Library Dialog for MotionPlay
+Motion library with sidebar filters and responsive grid.
 """
 
 import json
@@ -183,7 +183,7 @@ class MotionLibraryDialog(BlackDialog):
         # Floating button
         self.add_button = None
         
-        self.setWindowTitle("Motion Library — MotionPlay v3.0 FINAL FORM")
+        self.setWindowTitle("Motion Library")
         self.setMinimumSize(1200, 800)
         self.setModal(True)
         
@@ -191,7 +191,7 @@ class MotionLibraryDialog(BlackDialog):
         self._load_motions()
         self._apply_styles()
         
-        logger.info("Motion Library v3.0 opened")
+        logger.info("Motion Library opened")
     
     def _init_ui(self):
         """Initialize v3.0 UI with sidebar and content area."""

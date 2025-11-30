@@ -10,26 +10,13 @@ from .colors import BLACK, WHITE, RED, RED_PRIMARY, GRAY
 
 
 def apply_dark_theme(app: QApplication) -> None:
-    """
-    Apply the unified dark theme to the entire application.
-    
-    This function sets up:
-    - Environment variables to block system themes
-    - Fusion style for consistent cross-platform rendering
-    - Nuclear black palette
-    - Global stylesheet overrides
-    
-    Args:
-        app: QApplication instance to apply theme to
-    """
+    """Apply the unified dark theme to the entire application."""
     # Block system theme interference
     os.environ["QT_QPA_PLATFORMTHEME"] = ""
     os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
     
-    # Use Fusion style for consistent rendering
     app.setStyle('Fusion')
     
-    # Create nuclear black palette
     palette = QPalette()
     black = QColor(BLACK)
     white = QColor(WHITE)

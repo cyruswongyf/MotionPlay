@@ -1,7 +1,6 @@
 """
 MediaPipe Processor for MotionPlay
 Handles hand and pose landmark detection and normalization.
-Pure logic - no UI dependencies.
 """
 
 import cv2

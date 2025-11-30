@@ -1,9 +1,4 @@
-"""
-MotionPlay - Pro Gaming Gesture Recognition
-Main entry point with clean architecture and proper lifecycle management.
 
-v3.1 - Professional, maintainable, open-source ready
-"""
 
 import sys
 import yaml
@@ -15,7 +10,7 @@ from logging.handlers import RotatingFileHandler
 from PyQt6.QtWidgets import QApplication
 from PyQt6.QtCore import QTimer
 
-# Import from the new organized structure
+
 from motionplay.core import Camera, MediaPipeProcessor, MotionRecognizer, ActionMapper
 from motionplay.ui import MotionPlayMainWindow
 from motionplay.styles.themes import apply_dark_theme
@@ -32,17 +27,17 @@ def setup_logging(config: dict) -> None:
     level = getattr(logging, log_config.get('level', 'INFO'))
     fmt = log_config.get('format', '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     
-    # Create logger
+
     logger = logging.getLogger()
     logger.setLevel(level)
     
-    # Console handler
+
     console_handler = logging.StreamHandler()
     console_handler.setLevel(level)
     console_handler.setFormatter(logging.Formatter(fmt))
     logger.addHandler(console_handler)
     
-    # File handler (if specified)
+
     log_file = log_config.get('file')
     if log_file:
         log_path = Path(log_file)
@@ -59,15 +54,7 @@ def setup_logging(config: dict) -> None:
 
 
 def load_config(config_path: str = 'config.yaml') -> dict:
-    """
-    Load configuration from YAML file.
-    
-    Args:
-        config_path: Path to config file
-        
-    Returns:
-        Configuration dict
-    """
+    """Load configuration from YAML file."""
     try:
         with open(config_path, 'r') as f:
             config = yaml.safe_load(f)
@@ -86,31 +73,21 @@ def load_config(config_path: str = 'config.yaml') -> dict:
 
 
 class MotionPlayApp:
-    """
-    Main application coordinator.
-    Manages camera, processing, recognition, and UI lifecycle.
-    """
+    """Main application coordinator."""
     
     def __init__(self, config: dict, offline_mode: bool = False):
-        """
-        Initialize the application.
-        
-        Args:
-            config: Configuration dict
-            offline_mode: Skip model download checks
-        """
         self.config = config
         self.offline_mode = offline_mode
         self.logger = logging.getLogger(__name__)
         
-        # Components
+
         self.camera: Camera = None
         self.processor: MediaPipeProcessor = None
         self.recognizer: MotionRecognizer = None
         self.action_mapper: ActionMapper = None
         self.window: MotionPlayMainWindow = None
         
-        # State
+
         self.timestamp_ms = 0
         self.running = False
         
@@ -120,7 +97,7 @@ class MotionPlayApp:
     
     def _init_components(self):
         """Initialize core components."""
-        # Camera
+
         cam_config = self.config['camera']
         self.camera = Camera(
             camera_id=cam_config['device_id'],
@@ -131,7 +108,7 @@ class MotionPlayApp:
             buffer_size=cam_config.get('buffer_size', 1)
         )
         
-        # MediaPipe
+
         mp_config = self.config['mediapipe']
         self.processor = MediaPipeProcessor(
             hand_model_path=mp_config.get('hand_model', 'models/hand_landmarker.task'),
@@ -143,14 +120,14 @@ class MotionPlayApp:
             offline_mode=self.offline_mode
         )
         
-        # Recognizer
+
         rec_config = self.config['recognition']
         self.recognizer = MotionRecognizer(
             confidence_threshold=rec_config['confidence_threshold'],
             cooldown_ms=rec_config['cooldown_ms']
         )
         
-        # Action Mapper
+
         prof_config = self.config['profiles']
         rec_config = self.config['recognition']
         self.action_mapper = ActionMapper(
@@ -171,11 +148,11 @@ class MotionPlayApp:
         self.window = MotionPlayMainWindow(self.config)
         self.window.profile_changed.connect(self._on_profile_changed)
         
-        # Set available profiles
+
         profiles = self.action_mapper.list_available_profiles()
         self.window.set_profiles(profiles)
         
-        # Setup processing timer
+
         self.process_timer = QTimer()
         self.process_timer.timeout.connect(self._process_frame)
         self.process_timer.start(33)  # ~30 FPS
@@ -185,7 +162,7 @@ class MotionPlayApp:
         
         self.logger.info("Application started")
         
-        # Run event loop
+
         return app.exec()
     
     def _process_frame(self):
@@ -193,16 +170,16 @@ class MotionPlayApp:
         if not self.running:
             return
         
-        # Read frame
+
         ret, frame = self.camera.read_frame()
         if not ret or frame is None:
             return
         
-        # Process with MediaPipe
+
         self.timestamp_ms += 33
         self.processor.process_frame(frame, self.timestamp_ms)
         
-        # Draw landmarks if enabled
+
         if self.config['ui']['overlay'].get('show_landmarks', True):
             frame = self.processor.draw_landmarks(frame)
         
@@ -210,7 +187,7 @@ class MotionPlayApp:
         self.window.update_frame(frame)
         self.window.update_fps(int(self.camera.get_fps()))
         
-        # Recognize motion
+
         gestures = self.processor.get_gestures()
         detection = self.recognizer.recognize_from_gestures(gestures, self.timestamp_ms)
         

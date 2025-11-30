@@ -20,17 +20,14 @@ logger = logging.getLogger(__name__)
 
 
 class NoOverlapDelegate(QStyledItemDelegate):
-    """
-    Custom delegate to prevent text overlap when editing Name column.
-    Auto-saves to YAML on Enter key press.
-    """
+    """Custom delegate for Name column editing with auto-save."""
     
     def __init__(self, parent=None):
         super().__init__(parent)
         self.table_widget = None  # Will be set by MappingTable
     
     def createEditor(self, parent, option, index):
-        """Create editor with proper styling - no overlap."""
+        """Create editor with proper styling."""
         editor = QLineEdit(parent)
         editor.setStyleSheet(f"""
             QLineEdit {{
@@ -47,7 +44,6 @@ class NoOverlapDelegate(QStyledItemDelegate):
         return editor
     
     def setEditorData(self, editor, index):
-        """Set editor data from model."""
         value = index.model().data(index, Qt.ItemDataRole.DisplayRole)
         editor.setText(str(value) if value else "")
     

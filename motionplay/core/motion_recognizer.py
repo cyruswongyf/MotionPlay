@@ -1,7 +1,6 @@
 """
 Motion Recognizer for MotionPlay
 Loads trained gesture models and recognizes motion patterns.
-Pure logic - no UI dependencies.
 """
 
 import logging
@@ -41,10 +40,8 @@ class MotionRecognizer:
         self.confidence_threshold = confidence_threshold
         self.cooldown_ms = cooldown_ms
         
-        # Last detection tracking for cooldown
         self.last_detection_time: Dict[str, int] = {}
         
-        # Load custom classifier if provided
         self.custom_classifier = None
         if custom_classifier_path and Path(custom_classifier_path).exists():
             self._load_custom_classifier(custom_classifier_path)

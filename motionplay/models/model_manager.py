@@ -1,7 +1,6 @@
 """
 Model Manager for MotionPlay
 Handles automatic downloading and validation of MediaPipe models.
-Ensures seamless setup for end users while supporting offline/manual workflows.
 """
 
 import os
@@ -13,7 +12,6 @@ import urllib.error
 
 logger = logging.getLogger(__name__)
 
-# Official MediaPipe model URLs (2025)
 MODEL_URLS: Dict[str, str] = {
     'hand_landmarker.task': 
         'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task',
@@ -23,7 +21,6 @@ MODEL_URLS: Dict[str, str] = {
         'https://storage.googleapis.com/mediapipe-models/gesture_recognizer/gesture_recognizer/float16/1/gesture_recognizer.task',
 }
 
-# Default models directory
 MODELS_DIR = Path('models')
 
 
@@ -36,35 +33,23 @@ class ProgressBar:
         self.current = 0
         
     def update(self, chunk_size: int):
-        """Update progress bar."""
         self.current += chunk_size
         percent = min(100, int(100 * self.current / self.total))
         bar_length = 40
         filled = int(bar_length * percent / 100)
         bar = '█' * filled + '░' * (bar_length - filled)
         
-        # Convert bytes to MB
         current_mb = self.current / (1024 * 1024)
         total_mb = self.total / (1024 * 1024)
         
         print(f'\r{self.prefix} [{bar}] {percent}% ({current_mb:.1f}/{total_mb:.1f} MB)', end='', flush=True)
         
         if self.current >= self.total:
-            print()  # New line when complete
+            print()
 
 
 def download_model(url: str, destination: Path, force: bool = False) -> bool:
-    """
-    Download a MediaPipe model from official Google Storage.
-    
-    Args:
-        url: Model download URL
-        destination: Local file path to save model
-        force: Force re-download even if file exists
-        
-    Returns:
-        True if download successful or file already exists, False on error
-    """
+    """Download a MediaPipe model from official Google Storage."""
     if destination.exists() and not force:
         logger.info(f"Model already exists: {destination.name}")
         return True
@@ -73,7 +58,6 @@ def download_model(url: str, destination: Path, force: bool = False) -> bool:
         logger.info(f"Downloading {destination.name}...")
         print(f"📥 Downloading {destination.name}...", flush=True)
         
-        # Get file size for progress bar
         with urllib.request.urlopen(url) as response:
             file_size = int(response.headers.get('Content-Length', 0))
             

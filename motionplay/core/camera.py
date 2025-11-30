@@ -1,7 +1,6 @@
 """
 Camera module for MotionPlay
 Handles camera capture, frame preprocessing, and FPS calculation.
-Pure logic - no UI dependencies.
 """
 
 import cv2
@@ -54,7 +53,6 @@ class Camera:
         self.cap: Optional[cv2.VideoCapture] = None
         self.is_opened = False
         
-        # FPS tracking
         self._fps_start_time = time.time()
         self._fps_counter = 0
         self._current_fps = 0.0

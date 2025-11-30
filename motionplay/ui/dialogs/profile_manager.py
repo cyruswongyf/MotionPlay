@@ -1,7 +1,6 @@
 """
 MotionPlay Motion Mapping Group System
 Clean, modular profile manager using reusable components.
-Professional gaming peripheral software aesthetic.
 """
 
 import logging

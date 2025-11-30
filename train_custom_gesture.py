@@ -1,13 +1,7 @@
 #!/usr/bin/env python3
 """
 Custom Gesture Training Script for MotionPlay
-Uses MediaPipe Model Maker to train custom gesture recognizer from recorded data.
-
-Requirements:
-    pip install mediapipe-model-maker
-
-Usage:
-    python train_custom_gesture.py --data assets/recordings --output models/custom_gesture_recognizer.task
+Trains custom gesture recognizer from recorded data.
 """
 
 import os
@@ -19,7 +13,6 @@ from pathlib import Path
 from typing import List, Dict, Any
 import numpy as np
 
-# Setup logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s'
@@ -28,24 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 def load_recordings(data_dir: Path) -> Dict[str, List[Any]]:
-    """
-    Load all gesture recordings from directory structure.
-    
-    Expected structure:
-        assets/recordings/
-            gesture_name_1/
-                gesture_name_1_seq1_20231128_120000.json
-                gesture_name_1_seq2_20231128_120005.json
-                ...
-            gesture_name_2/
-                ...
-    
-    Args:
-        data_dir: Root directory containing gesture folders
-        
-    Returns:
-        Dict mapping gesture names to list of sequences
-    """
+    """Load all gesture recordings from directory structure."""
     logger.info(f"Loading recordings from {data_dir}")
     
     gesture_data = {}
@@ -90,15 +66,7 @@ def load_recordings(data_dir: Path) -> Dict[str, List[Any]]:
 
 
 def prepare_mediapipe_data(gesture_data: Dict[str, List[Any]]) -> tuple:
-    """
-    Prepare data in MediaPipe Model Maker format.
-    
-    Args:
-        gesture_data: Dict of gesture sequences
-        
-    Returns:
-        Tuple of (landmarks_list, labels_list)
-    """
+    """Prepare data in MediaPipe Model Maker format."""
     logger.info("Preparing data for MediaPipe Model Maker")
     
     all_landmarks = []
@@ -134,15 +102,7 @@ def prepare_mediapipe_data(gesture_data: Dict[str, List[Any]]) -> tuple:
 
 
 def train_with_tensorflow(gesture_data: Dict[str, List[Any]], output_path: Path, epochs: int = 30):
-    """
-    Train custom gesture model using TensorFlow/Keras.
-    This is an alternative if MediaPipe Model Maker is not available.
-    
-    Args:
-        gesture_data: Dict of gesture sequences
-        output_path: Path to save trained model
-        epochs: Number of training epochs
-    """
+    """Train custom gesture model using TensorFlow/Keras."""
     try:
         import tensorflow as tf
         from tensorflow import keras

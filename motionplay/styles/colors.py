@@ -1,7 +1,6 @@
 """
 MotionPlay Color Palette
-Centralized color definitions for the entire application.
-Pure Black + Aggressive Red Cyberpunk Theme
+Centralized color definitions.
 """
 
 # Primary Colors
@@ -38,7 +37,6 @@ WARNING = "#ffaa00"
 ERROR = "#ff1a1a"
 INFO = "#3399ff"
 
-# Compatibility aliases (for gradual migration)
 COLORS = {
     'BG_BLACK': BLACK,
     'PURE_BLACK': PURE_BLACK,

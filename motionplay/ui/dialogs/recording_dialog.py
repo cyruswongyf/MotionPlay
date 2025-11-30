@@ -1,6 +1,5 @@
 """
 Recording Dialog for MotionPlay
-Enhanced modal dialog for recording new motion gestures with live preview.
 """
 
 import logging
@@ -51,7 +50,6 @@ class RecordingDialog(BlackDialog):
         
         self._init_ui()
         
-        # Apply basic styling
         self.setStyleSheet(f"""
             QDialog {{ background-color: {COLORS['BG_BLACK']}; color: white; }}
             QPushButton {{ 
@@ -64,7 +62,8 @@ class RecordingDialog(BlackDialog):
             }}
             QPushButton:hover {{ background-color: {COLORS['RED_PRIMARY']}; }}
             QLabel {{ color: white; background-color: transparent; }}
-        """)        # Setup preview timer
+        """)
+        
         if self.camera and self.processor:
             self.preview_timer = QTimer()
             self.preview_timer.timeout.connect(self._update_preview)
