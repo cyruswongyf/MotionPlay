@@ -21,7 +21,14 @@ logger = logging.getLogger(__name__)
 
 
 class NoOverlapDelegate(QStyledItemDelegate):
-    """Custom delegate to prevent text overlap when editing Name column."""
+    """
+    Custom delegate to prevent text overlap when editing Name column.
+    Auto-saves to YAML on Enter key press.
+    """
+    
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.table_widget = None  # Will be set by MappingTable
     
     def createEditor(self, parent, option, index):
         """Create editor with proper styling - no overlap."""
@@ -36,6 +43,8 @@ class NoOverlapDelegate(QStyledItemDelegate):
                 font-size: 11pt;
             }}
         """)
+        # Connect Enter key to commit and save
+        editor.returnPressed.connect(lambda: self._commit_and_save(editor))
         return editor
     
     def setEditorData(self, editor, index):
@@ -46,6 +55,15 @@ class NoOverlapDelegate(QStyledItemDelegate):
     def setModelData(self, editor, model, index):
         """Save editor data to model."""
         model.setData(index, editor.text(), Qt.ItemDataRole.DisplayRole)
+    
+    def _commit_and_save(self, editor):
+        """Commit editor and trigger auto-save on Enter."""
+        self.commitData.emit(editor)
+        self.closeEditor.emit(editor)
+        # Trigger parent table's save
+        if self.table_widget and hasattr(self.table_widget, '_save_profile'):
+            self.table_widget._save_profile()
+            logger.info("Auto-saved on Enter key")
 
 logger = logging.getLogger(__name__)
 
@@ -107,8 +125,10 @@ class MappingTable(QWidget):
         self.table.setAlternatingRowColors(True)
         self.table.setStyleSheet(MAPPING_TABLE_STYLESHEET)
         
-        # Set NoOverlapDelegate for Name column (column 0) - FINAL FIX
-        self.table.setItemDelegateForColumn(0, NoOverlapDelegate(self.table))
+        # Set NoOverlapDelegate for Name column (column 0) - FINAL FIX with Enter auto-save
+        delegate = NoOverlapDelegate(self.table)
+        delegate.table_widget = self  # Set reference for auto-save
+        self.table.setItemDelegateForColumn(0, delegate)
         
         # v3: Column sizing - Name | Control | Motion (all stretch)
         header = self.table.horizontalHeader()

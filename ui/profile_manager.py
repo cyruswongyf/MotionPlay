@@ -39,8 +39,9 @@ class ProfileManagerDialog(BlackDialog):
         self.setMinimumSize(1400, 750)
         self.setModal(True)
         
-        self._init_ui()
+        # Apply profile manager styles BEFORE building UI
         self._apply_styles()
+        self._init_ui()
         
         # Auto-refresh timer for external file changes
         self.refresh_timer = QTimer(self)
@@ -55,9 +56,20 @@ class ProfileManagerDialog(BlackDialog):
         main_layout.setContentsMargins(15, 15, 15, 15)
         main_layout.setSpacing(10)
         
-        # FIXED: Horizontal splitter with transparent handle - no red connecting line
+        # NUCLEAR FIX: Force entire dialog and splitter to pure black
+        self.setObjectName("ProfileManagerDialog")
+        
+        # FIXED: Horizontal splitter with BLACK background - no white gaps
         splitter = QSplitter(Qt.Orientation.Horizontal)
         splitter.setHandleWidth(12)  # 12px clean gap between panels
+        splitter.setStyleSheet(f"""
+            QSplitter {{ 
+                background-color: #0d0d0d; 
+            }}
+            QSplitter::handle {{ 
+                background: #1a1a1a; 
+            }}
+        """)
         
         # Left panel: Profile list widget
         left_panel = self._create_panel()
@@ -110,8 +122,20 @@ class ProfileManagerDialog(BlackDialog):
         return panel
     
     def _apply_styles(self):
-        """Apply red theme styling."""
-        self.setStyleSheet(PROFILE_MANAGER_STYLESHEET)
+        """Apply red theme styling with NUCLEAR BLACK background fix."""
+        # NUCLEAR FIX: Force ALL backgrounds to pure black
+        nuclear_black_fix = f"""
+            #ProfileManagerDialog, QDialog, QWidget {{ 
+                background-color: #0d0d0d; 
+            }}
+            QSplitter {{ 
+                background-color: #0d0d0d; 
+            }}
+            QSplitter::handle {{ 
+                background: #1a1a1a; 
+            }}
+        """
+        self.setStyleSheet(nuclear_black_fix + "\n" + PROFILE_MANAGER_STYLESHEET)
     
     def _on_profile_selected(self, profile_name: str):
         """FINAL CHANGE: Profile selection INSTANTLY activates profile - no button needed."""

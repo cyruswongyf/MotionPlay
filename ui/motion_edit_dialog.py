@@ -9,11 +9,14 @@ from pathlib import Path
 from typing import Optional
 from PyQt6.QtWidgets import (
     QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-    QLineEdit, QTextEdit, QFileDialog, QWidget, QInputDialog
+    QLineEdit, QTextEdit, QFileDialog, QWidget
 )
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QFont, QPixmap, QColor
-from .base import BlackDialog, show_warning, show_question, show_error
+from .base import (
+    BlackDialog, BlackInputDialog, BlackMultiLineInputDialog,
+    show_warning, show_question, show_error
+)
 from .styles.common import COLORS
 
 logger = logging.getLogger(__name__)
@@ -304,11 +307,10 @@ class MotionEditDialog(BlackDialog):
     
     def _edit_name(self):
         """Edit motion name inline."""
-        text, ok = QInputDialog.getText(
+        text, ok = BlackInputDialog.get_text_input(
             self,
             "Edit Name",
             "Motion Name:",
-            QLineEdit.EchoMode.Normal,
             self.display_name
         )
         
@@ -319,7 +321,7 @@ class MotionEditDialog(BlackDialog):
     
     def _edit_description(self):
         """Edit description inline."""
-        text, ok = QInputDialog.getMultiLineText(
+        text, ok = BlackMultiLineInputDialog.get_multi_line_text_input(
             self,
             "Edit Description",
             "Motion Description:",
@@ -334,11 +336,10 @@ class MotionEditDialog(BlackDialog):
     def _edit_tags(self):
         """Edit tags inline."""
         current_tags_str = ", ".join(self.tags)
-        text, ok = QInputDialog.getText(
+        text, ok = BlackInputDialog.get_text_input(
             self,
             "Edit Tags",
             "Tags (comma-separated):",
-            QLineEdit.EchoMode.Normal,
             current_tags_str
         )
         
