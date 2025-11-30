@@ -10,8 +10,8 @@ mappings:
 - name: Pointing Up
   control: w
   motion: pointing_up
-- name: Thumb Up
-  control: e
+- name: UP
+  control: w
   motion: thumb_up
 - name: Thumb Down
   control: q

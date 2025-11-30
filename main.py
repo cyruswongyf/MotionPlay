@@ -1,17 +1,12 @@
 """
 MotionPlay - Pro Gaming Gesture Recognition
 Main entry point with clean architecture and proper lifecycle management.
-"""
 
-# v3.0 NUCLEAR BLACK THEME — FINAL SOLUTION
-# Set environment variables BEFORE any Qt imports
-import os
-os.environ["QT_QPA_PLATFORMTHEME"] = ""  # Block system theme
-os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
+v3.1 - Professional, maintainable, open-source ready
+"""
 
 import sys
 import yaml
-import time
 import signal
 import logging
 import argparse
@@ -19,14 +14,11 @@ from pathlib import Path
 from logging.handlers import RotatingFileHandler
 from PyQt6.QtWidgets import QApplication
 from PyQt6.QtCore import QTimer
-from PyQt6.QtGui import QPalette, QColor
 
-from core import Camera, MediaPipeProcessor, MotionRecognizer, ActionMapper
-from core.motion_recorder import MotionRecorder
-from ui import MotionPlayMainWindow
-
-# Global flag for graceful shutdown
-running = True
+# Import from the new organized structure
+from motionplay.core import Camera, MediaPipeProcessor, MotionRecognizer, ActionMapper
+from motionplay.ui import MotionPlayMainWindow
+from motionplay.styles.themes import apply_dark_theme
 
 
 def setup_logging(config: dict) -> None:
@@ -241,7 +233,7 @@ class MotionPlayApp:
                     self.logger.info(f"⚡ Gesture triggered: {motion} → {action} ({confidence:.2f})")
     
     def _on_profile_changed(self, profile_name: str):
-        """FINAL CHANGE: Handle instant profile change from Profile Manager."""
+        """Handle instant profile change from Profile Manager."""
         if self.action_mapper.switch_profile(profile_name):
             self.logger.info(f"⚡ Profile instantly switched: {profile_name}")
             # Update current profile for main window sync
@@ -271,8 +263,6 @@ class MotionPlayApp:
 
 def signal_handler(sig, frame):
     """Handle interrupt signals for graceful shutdown."""
-    global running
-    running = False
     print("\nShutting down gracefully...")
     sys.exit(0)
 
@@ -300,7 +290,7 @@ def main():
     signal.signal(signal.SIGTERM, signal_handler)
     
     logger.info("=" * 60)
-    logger.info("MotionPlay - Pro Gaming Gesture Recognition")
+    logger.info("MotionPlay v3.1 - Pro Gaming Gesture Recognition")
     logger.info("=" * 60)
     
     if args.offline:
@@ -311,51 +301,8 @@ def main():
         app = QApplication(sys.argv)
         app.setApplicationName("MotionPlay")
         
-        # v3.0 NUCLEAR BLACK THEME — THE ABSOLUTE FINAL SOLUTION
-        app.setStyle('Fusion')
-        
-        # Nuclear palette
-        palette = QPalette()
-        black = QColor("#0d0d0d")
-        white = QColor("#ffffff")
-        red = QColor("#ff1a1a")
-        
-        # Force ALL background roles to nuclear black
-        for role in [QPalette.ColorRole.Window, QPalette.ColorRole.Base,
-                    QPalette.ColorRole.AlternateBase, QPalette.ColorRole.Button,
-                    QPalette.ColorRole.Light, QPalette.ColorRole.Midlight,
-                    QPalette.ColorRole.Dark, QPalette.ColorRole.Shadow,
-                    QPalette.ColorRole.ToolTipBase]:
-            palette.setColor(role, black)
-        
-        # Force ALL text roles to white
-        for role in [QPalette.ColorRole.Text, QPalette.ColorRole.WindowText,
-                    QPalette.ColorRole.ButtonText, QPalette.ColorRole.HighlightedText,
-                    QPalette.ColorRole.ToolTipText, QPalette.ColorRole.BrightText]:
-            palette.setColor(role, white)
-        
-        # Red highlights
-        for role in [QPalette.ColorRole.Highlight, QPalette.ColorRole.Link]:
-            palette.setColor(role, red)
-        
-        app.setPalette(palette)
-        
-        # Final kill - global stylesheet that overrides EVERYTHING
-        app.setStyleSheet("""
-            QMainWindow, QDialog, QWidget { 
-                background-color: #0d0d0d; 
-                color: white; 
-            }
-            QLabel, QLineEdit, QComboBox, QTextEdit { 
-                color: white; 
-                background-color: #111111; 
-            }
-            QToolTip { 
-                background-color: #0d0d0d; 
-                color: white; 
-                border: 1px solid #ff1a1a; 
-            }
-        """)
+        # Apply unified dark theme
+        apply_dark_theme(app)
         
         # Create and run app
         motion_app = MotionPlayApp(config, offline_mode=args.offline)

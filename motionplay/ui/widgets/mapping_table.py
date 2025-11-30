@@ -13,8 +13,7 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QFont, QColor
-from ..styles.common import COLORS
-from ..styles.mapping_table import MAPPING_TABLE_STYLESHEET
+from ...styles.colors import COLORS
 from .key_selector_dialog import KeySelectorDialog
 
 logger = logging.getLogger(__name__)
@@ -123,7 +122,32 @@ class MappingTable(QWidget):
         self.table.itemChanged.connect(self._on_item_changed)  # Track name changes
         self.table.setShowGrid(True)
         self.table.setAlternatingRowColors(True)
-        self.table.setStyleSheet(MAPPING_TABLE_STYLESHEET)
+        
+        # Apply styling
+        self.table.setStyleSheet(f"""
+            QTableWidget {{
+                background-color: {COLORS['GRAY_DARK']};
+                color: {COLORS['WHITE']};
+                gridline-color: {COLORS['RED_DARK']};
+                border: 2px solid {COLORS['RED_DARK']};
+                border-radius: 5px;
+            }}
+            QTableWidget::item {{
+                padding: 8px;
+                border: none;
+            }}
+            QTableWidget::item:selected {{
+                background-color: {COLORS['RED_DARK']};
+                color: {COLORS['WHITE']};
+            }}
+            QHeaderView::section {{
+                background-color: {COLORS['GRAY']};
+                color: {COLORS['RED_BRIGHT']};
+                padding: 10px;
+                border: 1px solid {COLORS['RED_DARK']};
+                font-weight: bold;
+            }}
+        """)
         
         # Set NoOverlapDelegate for Name column (column 0) - FINAL FIX with Enter auto-save
         delegate = NoOverlapDelegate(self.table)

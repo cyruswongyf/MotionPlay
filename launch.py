@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """
 MotionPlay Quick Launcher
-Checks dependencies and starts the application.
+Professional, simplified launcher for v3.1
+
+Checks dependencies and starts the application with proper theming.
 """
 
 import sys
@@ -80,15 +82,14 @@ def check_config():
 
 def main():
     """Main launcher"""
-    # Parse command-line arguments
     parser = argparse.ArgumentParser(
-        description='MotionPlay - Pro Gaming Gesture Recognition System',
+        description='MotionPlay v3.1 - Pro Gaming Gesture Recognition System',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  python launch.py                  # Normal launch with auto-download
+  python launch.py                    # Normal launch with auto-download
   python launch.py --download-models  # Force re-download models
-  python launch.py --offline        # Skip download checks (air-gapped)
+  python launch.py --offline          # Skip download checks (air-gapped)
         """
     )
     parser.add_argument(
@@ -117,9 +118,8 @@ Examples:
         print()
         
         try:
-            # Import and use model_manager
-            from core import model_manager
-            model_manager.ensure_models_exist(force_download=True)
+            from motionplay.models import ensure_models_exist
+            ensure_models_exist(force_download=True)
             print("\n✅ Model download complete!")
             return 0
         except Exception as e:
@@ -127,7 +127,7 @@ Examples:
             return 1
     
     print("=" * 60)
-    print("MotionPlay Quick Launcher")
+    print("MotionPlay v3.1 Quick Launcher")
     print("=" * 60)
     print()
     
@@ -170,7 +170,7 @@ Examples:
     print("✅ All checks passed!")
     print("=" * 60)
     print()
-    print("Starting MotionPlay...")
+    print("Starting MotionPlay v3.1...")
     print()
     
     # Launch main.py with offline flag if specified

@@ -14,17 +14,8 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt, pyqtSignal, QSize, QEvent
 from PyQt6.QtGui import QFont, QPixmap, QPainter, QColor, QPen
-from .base import BlackDialog
-from .styles.common import COLORS
-from .styles.motion_library import (
-    MOTION_LIBRARY_STYLESHEET,
-    MOTION_CARD_STYLE,
-    MOTION_CARD_HOVER_STYLE,
-    CLOSE_BTN_STYLE,
-    FLOATING_ADD_BTN_STYLE,
-    TAG_CHECKBOX_STYLE,
-    CLEAR_FILTERS_BTN_STYLE
-)
+from ...utils.dark_dialogs import BlackDialog
+from ...styles.colors import COLORS
 from .motion_edit_dialog import MotionEditDialog
 from .recording_dialog import RecordingDialog
 
@@ -140,7 +131,7 @@ class MotionCard(QFrame):
     
     def _apply_styles(self):
         """Apply card styling."""
-        self.setStyleSheet(MOTION_CARD_STYLE)
+        self.setStyleSheet(f"QFrame {{ background-color: {COLORS['GRAY_DARK']}; border: 2px solid {COLORS['RED_DARK']}; border-radius: 8px; }}")
     
     def mousePressEvent(self, event):
         """Handle single click (will be overridden by double-click)."""
@@ -156,7 +147,7 @@ class MotionCard(QFrame):
     
     def enterEvent(self, event):
         """Handle mouse enter."""
-        self.setStyleSheet(MOTION_CARD_HOVER_STYLE)
+        self.setStyleSheet(f"QFrame {{ background-color: {COLORS['GRAY']}; border: 2px solid {COLORS['RED_PRIMARY']}; border-radius: 8px; }}")
         super().enterEvent(event)
     
     def leaveEvent(self, event):
@@ -259,7 +250,7 @@ class MotionLibraryDialog(BlackDialog):
         close_btn = QPushButton("Close")
         close_btn.setMinimumSize(140, 50)
         close_btn.setFont(QFont("Arial", 11, QFont.Weight.Bold))
-        close_btn.setStyleSheet(CLOSE_BTN_STYLE)
+        close_btn.setStyleSheet(f"QPushButton {{ background: {COLORS['RED_PRIMARY']}; color: white; border: none; border-radius: 15px; font-weight: bold; }} QPushButton:hover {{ background: {COLORS['RED_BRIGHT']}; }}")
         close_btn.clicked.connect(self.reject)
         bottom_layout.addWidget(close_btn)
         
@@ -274,7 +265,7 @@ class MotionLibraryDialog(BlackDialog):
         self.add_button.setFixedSize(70, 70)
         self.add_button.setFont(QFont("Arial", 32, QFont.Weight.Bold))
         self.add_button.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.add_button.setStyleSheet(FLOATING_ADD_BTN_STYLE)
+        self.add_button.setStyleSheet(f"QPushButton {{ background: {COLORS['RED_PRIMARY']}; color: white; border: 2px solid {COLORS['RED_BRIGHT']}; border-radius: 30px; font-size: 24px; font-weight: bold; }} QPushButton:hover {{ background: {COLORS['RED_BRIGHT']}; }}")
         self.add_button.clicked.connect(self._on_create_motion)
         self.add_button.show()
     
@@ -300,7 +291,7 @@ class MotionLibraryDialog(BlackDialog):
         for tag in sorted(self.ALL_TAGS):
             checkbox = QCheckBox(tag.upper())
             checkbox.setFont(QFont("Arial", 11))
-            checkbox.setStyleSheet(TAG_CHECKBOX_STYLE)
+            checkbox.setStyleSheet(f"QCheckBox {{ color: {COLORS['WHITE']}; spacing: 8px; }} QCheckBox::indicator {{ width: 18px; height: 18px; border: 2px solid {COLORS['RED_DARK']}; background: {COLORS['GRAY_DARK']}; }} QCheckBox::indicator:checked {{ background: {COLORS['RED_PRIMARY']}; }}")
             checkbox.stateChanged.connect(self._on_filter_changed)
             self.tag_checkboxes[tag] = checkbox
             sidebar_layout.addWidget(checkbox)
@@ -311,7 +302,7 @@ class MotionLibraryDialog(BlackDialog):
         clear_btn = QPushButton("Clear Filters")
         clear_btn.setMinimumHeight(40)
         clear_btn.setFont(QFont("Arial", 11, QFont.Weight.Bold))
-        clear_btn.setStyleSheet(CLEAR_FILTERS_BTN_STYLE)
+        clear_btn.setStyleSheet(f"QPushButton {{ background: {COLORS['GRAY']}; color: white; border: 2px solid {COLORS['RED_DARK']}; padding: 10px; border-radius: 5px; }} QPushButton:hover {{ background: {COLORS['RED_DARK']}; }}")
         clear_btn.clicked.connect(self._clear_filters)
         sidebar_layout.addWidget(clear_btn)
         
@@ -553,4 +544,4 @@ class MotionLibraryDialog(BlackDialog):
     
     def _apply_styles(self):
         """Apply v3.0 nuclear black theme."""
-        self.setStyleSheet(MOTION_LIBRARY_STYLESHEET)
+        self.setStyleSheet(f"QDialog {{ background-color: {COLORS['BG_BLACK']}; color: white; }} QPushButton {{ background: #333; color: white; border: 2px solid {COLORS['RED_PRIMARY']}; padding: 8px; border-radius: 4px; }} QPushButton:hover {{ background: {COLORS['RED_PRIMARY']}; }}")

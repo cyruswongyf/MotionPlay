@@ -13,11 +13,11 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal
 from PyQt6.QtGui import QImage, QPixmap, QFont
-from .base import BlackMainWindow
-from .styles.common import COLORS
-from .styles.main_window import MAIN_WINDOW_STYLESHEET
-from .recording_dialog import RecordingDialog
-from .profile_manager import ProfileManagerDialog
+from ..utils.base_ui import BlackMainWindow
+from ..styles.colors import COLORS, BLACK, WHITE, RED_BRIGHT, RED_PRIMARY, RED_GLOW
+from ..styles.stylesheets import MAIN_WINDOW_STYLESHEET
+from .dialogs.recording_dialog import RecordingDialog
+from .dialogs.profile_manager import ProfileManagerDialog
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +38,7 @@ class TriggerOverlay(QWidget):
         self.motion_label = QLabel()
         self.motion_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.motion_label.setFont(QFont("Arial", 100, QFont.Weight.Bold))
-        self.motion_label.setStyleSheet(f"color: {COLORS['RED_BRIGHT']}; text-shadow: 0 0 20px {COLORS['RED_GLOW']}; letter-spacing: 8px;")
+        self.motion_label.setStyleSheet(f"color: {COLORS['RED_BRIGHT']}; letter-spacing: 8px;")
         layout.addWidget(self.motion_label)
         
         # Arrow
@@ -313,6 +313,6 @@ class MotionPlayMainWindow(BlackMainWindow):
     
     def _open_motion_library(self):
         """v2: Open Motion Library dialog for browsing available motions."""
-        from .motion_library_dialog import MotionLibraryDialog
+        from .dialogs.motion_library_dialog import MotionLibraryDialog
         dialog = MotionLibraryDialog(self)
         dialog.exec()

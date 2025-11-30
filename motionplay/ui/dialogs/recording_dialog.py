@@ -13,9 +13,8 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal
 from PyQt6.QtGui import QFont, QPixmap, QImage
-from .base import BlackDialog
-from .styles.common import COLORS
-from .styles.recording_dialog import RECORDING_DIALOG_STYLESHEET
+from ...utils.dark_dialogs import BlackDialog
+from ...styles.colors import COLORS
 
 logger = logging.getLogger(__name__)
 
@@ -51,9 +50,21 @@ class RecordingDialog(BlackDialog):
         self.setModal(True)
         
         self._init_ui()
-        self.setStyleSheet(RECORDING_DIALOG_STYLESHEET)
         
-        # Setup preview timer
+        # Apply basic styling
+        self.setStyleSheet(f"""
+            QDialog {{ background-color: {COLORS['BG_BLACK']}; color: white; }}
+            QPushButton {{ 
+                background-color: #333333; 
+                color: white; 
+                border: 2px solid {COLORS['RED_PRIMARY']}; 
+                padding: 10px;
+                border-radius: 4px;
+                font-weight: bold;
+            }}
+            QPushButton:hover {{ background-color: {COLORS['RED_PRIMARY']}; }}
+            QLabel {{ color: white; background-color: transparent; }}
+        """)        # Setup preview timer
         if self.camera and self.processor:
             self.preview_timer = QTimer()
             self.preview_timer.timeout.connect(self._update_preview)

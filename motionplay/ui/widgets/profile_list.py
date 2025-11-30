@@ -12,10 +12,22 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QFont, QColor
-from ..styles.common import COLORS
-from ..utils import dark_input_dialog, dark_message_box
+from ...styles.colors import COLORS
+from ...utils.dark_dialogs import BlackInputDialog, create_black_message_box
+from PyQt6.QtWidgets import QMessageBox
 
 logger = logging.getLogger(__name__)
+
+
+# Compatibility wrappers for old function names
+def dark_input_dialog(parent, title, label, default=""):
+    """Wrapper for BlackInputDialog - maintains old API"""
+    dialog = BlackInputDialog(parent, title, label, default)
+    return dialog
+
+def dark_message_box(parent, title, text, buttons=QMessageBox.StandardButton.Ok, icon=QMessageBox.Icon.NoIcon):
+    """Wrapper for create_black_message_box - maintains old API"""
+    return create_black_message_box(parent, icon, title, text, buttons)
 
 
 class ProfileListWidget(QWidget):
@@ -56,7 +68,29 @@ class ProfileListWidget(QWidget):
         
         # Profile list
         self.profile_list = QListWidget()
-        self.profile_list.setFont(QFont("Arial", 11))
+        self.profile_list.setFont(QFont("Arial", 12))
+        self.profile_list.setSpacing(6)  # Add spacing between items
+        self.profile_list.setStyleSheet(f"""
+            QListWidget {{
+                background-color: {COLORS['GRAY_DARK']};
+                color: {COLORS['WHITE']};
+                border: 2px solid {COLORS['RED_DARK']};
+                border-radius: 5px;
+                padding: 5px;
+            }}
+            QListWidget::item {{
+                padding: 12px 10px;
+                margin: 3px 0px;
+                border-radius: 4px;
+            }}
+            QListWidget::item:hover {{
+                background-color: {COLORS['GRAY']};
+            }}
+            QListWidget::item:selected {{
+                background-color: {COLORS['RED_PRIMARY']};
+                color: {COLORS['WHITE']};
+            }}
+        """)
         self.profile_list.currentItemChanged.connect(self._on_selection_changed)
         layout.addWidget(self.profile_list, 1)
         
@@ -124,11 +158,8 @@ class ProfileListWidget(QWidget):
     
     def _create_profile(self):
         """Create a new profile."""
-        dialog = dark_input_dialog(self, "New Profile", "Enter profile name:")
-        if dialog.exec() != QDialog.DialogCode.Accepted:
-            return
-        name = dialog.textValue()
-        if not name:
+        name, ok = BlackInputDialog.get_text_input(self, "New Profile", "Enter profile name:")
+        if not ok or not name:
             return
         
         name = name.strip()

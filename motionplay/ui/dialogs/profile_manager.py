@@ -12,10 +12,10 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt, pyqtSignal, QTimer
 from PyQt6.QtGui import QFont
-from .base import BlackDialog
-from .components import ProfileListWidget, MappingTable
-from .styles.common import COLORS
-from .styles.profile_manager import PROFILE_MANAGER_STYLESHEET
+from ...utils.dark_dialogs import BlackDialog
+from ..widgets.profile_list import ProfileListWidget
+from ..widgets.mapping_table import MappingTable
+from ...styles.colors import COLORS
 
 logger = logging.getLogger(__name__)
 
@@ -134,8 +134,16 @@ class ProfileManagerDialog(BlackDialog):
             QSplitter::handle {{ 
                 background: #1a1a1a; 
             }}
+            QPushButton {{ 
+                background-color: #333333; 
+                color: white; 
+                border: 2px solid {COLORS['RED_PRIMARY']}; 
+                padding: 8px;
+                border-radius: 4px;
+            }}
+            QPushButton:hover {{ background-color: {COLORS['RED_PRIMARY']}; }}
         """
-        self.setStyleSheet(nuclear_black_fix + "\n" + PROFILE_MANAGER_STYLESHEET)
+        self.setStyleSheet(nuclear_black_fix)
     
     def _on_profile_selected(self, profile_name: str):
         """FINAL CHANGE: Profile selection INSTANTLY activates profile - no button needed."""

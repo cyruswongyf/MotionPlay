@@ -9,9 +9,8 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
-from ..base import BlackDialog
-from ..styles.common import COLORS
-from ..styles.profile_manager import PROFILE_MANAGER_STYLESHEET
+from ...utils.dark_dialogs import BlackDialog
+from ...styles.colors import COLORS
 
 logger = logging.getLogger(__name__)
 
@@ -167,7 +166,20 @@ class KeySelectorDialog(BlackDialog):
     
     def _apply_styles(self):
         """Apply red theme styling."""
-        self.setStyleSheet(PROFILE_MANAGER_STYLESHEET)
+        
+        # Apply basic styling
+        self.setStyleSheet(f"""
+            QPushButton {{ 
+                background-color: #333333; 
+                color: white; 
+                border: 2px solid {COLORS['RED_PRIMARY']}; 
+                padding: 8px;
+                border-radius: 4px;
+                min-width: 80px;
+            }}
+            QPushButton:hover {{ background-color: {COLORS['RED_PRIMARY']}; }}
+            QLabel {{ color: white; background-color: transparent; }}
+        """)
     
     def get_action(self) -> str:
         """Get the selected action."""

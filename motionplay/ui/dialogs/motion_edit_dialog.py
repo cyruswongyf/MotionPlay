@@ -13,11 +13,11 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QFont, QPixmap, QColor
-from .base import (
+from ...utils.dark_dialogs import (
     BlackDialog, BlackInputDialog, BlackMultiLineInputDialog,
     show_warning, show_question, show_error
 )
-from .styles.common import COLORS
+from ...styles.colors import COLORS
 
 logger = logging.getLogger(__name__)
 
