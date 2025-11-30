@@ -129,7 +129,7 @@ class ActionMapper:
     
     def load_profile(self, profile_name: str) -> bool:
         """
-        Load a profile from YAML file.
+        Load a profile from YAML file (v3: simplified format with backward compatibility).
         
         Args:
             profile_name: Name of profile (without .yaml extension)
@@ -147,7 +147,37 @@ class ActionMapper:
             with open(profile_path, 'r') as f:
                 profile_data = yaml.safe_load(f)
             
-            self.mappings = profile_data.get('mappings', {})
+            mappings_data = profile_data.get('mappings', [])
+            
+            # v3: Convert to motion -> control mapping with backward compatibility
+            self.mappings = {}
+            
+            if isinstance(mappings_data, list):
+                # Check if v3 format (has 'motion' field) or v2 format (has 'motion_id' field)
+                for mapping in mappings_data:
+                    if 'motion' in mapping:
+                        # v3 format: {name, control, motion}
+                        motion = mapping.get('motion', '')
+                        control = mapping.get('control', '')
+                        
+                        if motion and control:
+                            self.mappings[motion] = control
+                    elif 'motion_id' in mapping:
+                        # v2 format: {display_name, control, motion_id}
+                        motion_id = mapping.get('motion_id', '')
+                        control = mapping.get('control', '')
+                        
+                        if motion_id and control:
+                            # Extract motion name from motion_id (e.g., "static/hadoken" -> "hadoken")
+                            motion = motion_id.split('/')[-1]
+                            self.mappings[motion] = control
+                            # Also keep full motion_id for backward compatibility
+                            self.mappings[motion_id] = control
+            elif isinstance(mappings_data, dict):
+                # Old dict format: motion_name -> control
+                for motion, control in mappings_data.items():
+                    self.mappings[motion] = control
+            
             self.current_profile = profile_name
             
             logger.info(f"✓ Profile loaded: {profile_name} ({len(self.mappings)} mappings)")

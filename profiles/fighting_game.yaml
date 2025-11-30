@@ -1,35 +1,17 @@
-# MotionPlay Profile: Fighting Game
-# Optimized for 2D/3D fighting games (Street Fighter, Tekken, Mortal Kombat, etc.)
-
 name: fighting_game
-
-# Fighting game motion mappings
-# Designed for classic special moves and combos
-# Optimized for Street Fighter, Tekken, Mortal Kombat
-
 mappings:
-  # Basic Attacks
-  Fist: j # Light punch
-  Open_Palm: k # Heavy punch
-  Victory: l # Light kick
-  Pointing_Up_Thumb: i # Heavy kick
-
-  # Special Moves (custom trained gestures)
-  Hadouken: space # Fireball/Projectile
-  Shoryuken: shift # Dragon punch/Anti-air
-
-  # Movement
-  Thumb_Up: w # Jump forward
-  Thumb_Down: s # Crouch/Block low
-  Pointing_Left: a # Move/Dash left
-  Pointing_Right: d # Move/Dash right
-
-  # Advanced Actions
-  Two_Fingers: g # Grab/Throw
-  Three_Fingers: x # EX/Super meter
-  Closed_Fist: backspace # Taunt
-  Peace: enter # Pause
-
-  # Built-in gestures
-  Rock: q # Quick combo 1
-  ILoveYou: e # Quick combo 2
+  - name: Hadoken
+    control: d
+    motion: hadoken
+  - name: Shoryuken
+    control: f
+    motion: shoryuken
+  - name: Kamehameha
+    control: space
+    motion: kamehameha
+  - name: Quick Punch
+    control: left_mouse
+    motion: punch_forward
+  - name: Uppercut Strike
+    control: right_mouse
+    motion: uppercut

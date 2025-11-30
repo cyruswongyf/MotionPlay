@@ -1,38 +1,11 @@
-# MotionPlay Profile: Default
-# General-purpose gesture controls for everyday use
-
 name: default
-
-# Default motion mappings - simple and intuitive
-# Basic mappings for general use and testing
-
 mappings:
-  # Mouse Actions
-  Fist: left_click # Primary click
-  Open_Palm: right_click # Secondary click
-
-  # Navigation
-  Victory: space # Space bar
-  Thumb_Up: up # Arrow up
-  Thumb_Down: down # Arrow down
-  Pointing_Left: left # Arrow left
-  Pointing_Right: right # Arrow right
-
-  # Common Keys
-  Peace: enter # Confirm
-  Rock: esc # Cancel / Escape
-  Closed_Fist: backspace # Delete
-  Two_Fingers: tab # Tab
-  Three_Fingers: shift # Shift modifier
-
-  # WASD Movement (gaming standard)
-  Thumb_Up_Forward: w # Forward
-  Thumb_Down_Back: s # Backward
-  Palm_Left: a # Left
-  Palm_Right: d # Right
-
-  # Extras
-  ILoveYou: ctrl # Control modifier
-  Shaka: alt # Alt modifier
-  Pointing_Up_Thumb: f # F key (common interact)
-  Thumb_Index_Crossed: e # E key (common use)
+  - name: Forward Punch
+    control: space
+    motion: punch_forward
+  - name: Uppercut
+    control: e
+    motion: uppercut
+  - name: Hadoken
+    control: "1"
+    motion: hadoken

@@ -1,0 +1,12 @@
+{
+  "motion_id": "static/shoryuken",
+  "display_name": "Shoryuken",
+  "description": "Dragon punch anti-air attack from Street Fighter",
+  "category": "special_move",
+  "difficulty": "hard",
+  "tags": ["anti-air", "uppercut", "street-fighter"],
+  "preview_gif": "preview.gif",
+  "author": "MotionPlay Team",
+  "created_date": "2026-01-01",
+  "version": "1.0"
+}

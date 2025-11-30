@@ -1,0 +1,12 @@
+{
+  "motion_id": "user/uppercut",
+  "display_name": "Uppercut",
+  "description": "Custom trained uppercut motion",
+  "category": "basic_attack",
+  "difficulty": "medium",
+  "tags": ["uppercut", "basic", "custom"],
+  "preview_gif": "preview.gif",
+  "author": "User",
+  "created_date": "2026-01-15",
+  "version": "1.0"
+}

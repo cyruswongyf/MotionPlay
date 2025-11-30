@@ -62,10 +62,10 @@ class MappingTable(QWidget):
         
         layout.addLayout(header_layout)
         
-        # FIXED: Motion mappings table - 3 columns with centered red arrow →
+        # v3: Motion mappings table - 3 columns (Name | Control | Motion)
         self.table = QTableWidget()
         self.table.setColumnCount(3)
-        self.table.setHorizontalHeaderLabels(["Motion Name", "", "Key/Action"])
+        self.table.setHorizontalHeaderLabels(["Name", "Control", "Motion"])
         self.table.setFont(QFont("Arial", 11))
         self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
@@ -74,12 +74,11 @@ class MappingTable(QWidget):
         self.table.setShowGrid(True)
         self.table.setAlternatingRowColors(True)
         
-        # FIXED: Column sizing - Name (stretch) | Arrow (60px fixed) | Key/Action (stretch)
+        # v3: Column sizing - Name | Control | Motion (all stretch)
         header = self.table.horizontalHeader()
         header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
-        header.setSectionResizeMode(1, QHeaderView.ResizeMode.Fixed)
+        header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
         header.setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
-        self.table.setColumnWidth(1, 60)  # Fixed 60px for arrow column
         
         # Row height
         self.table.verticalHeader().setDefaultSectionSize(40)
@@ -141,81 +140,97 @@ class MappingTable(QWidget):
         return stem.replace('_', ' ').title()
     
     def _populate_table(self):
-        """FIXED: Populate the table with 3 columns including centered red arrow →."""
+        """v3: Populate table with Name | Control | Motion format."""
         self.table.setRowCount(0)
         
-        mappings = self.profile_data.get('mappings', {})
+        mappings = self.profile_data.get('mappings', [])
         
-        for row, (motion, action) in enumerate(mappings.items()):
+        # Backward compatibility: convert old dict format to v3 list
+        if isinstance(mappings, dict):
+            mappings = [
+                {'name': name, 'control': ctrl, 'motion': name.lower()}
+                for name, ctrl in mappings.items()
+            ]
+        
+        for row, mapping in enumerate(mappings):
             self.table.insertRow(row)
             
-            # Column 0: Motion Name (white, left-aligned, read-only)
+            # Column 0: Name (editable display name)
+            name = mapping.get('name', 'Unnamed')
+            name_item = QTableWidgetItem(name)
+            name_item.setTextAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
+            name_item.setFont(QFont("Arial", 11))
+            name_item.setForeground(QColor(COLORS['WHITE']))
+            name_item.setFlags(Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable | Qt.ItemFlag.ItemIsEditable)
+            self.table.setItem(row, 0, name_item)
+            
+            # Column 1: Control (double-click to edit)
+            control = mapping.get('control', '')
+            control_display = str(control).upper() if control else "None"
+            control_item = QTableWidgetItem(control_display)
+            control_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+            control_item.setFont(QFont("Arial", 11, QFont.Weight.Bold))
+            control_item.setForeground(QColor(COLORS['RED_BRIGHT']))
+            control_item.setData(Qt.ItemDataRole.UserRole, control)
+            control_item.setFlags(Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
+            self.table.setItem(row, 1, control_item)
+            
+            # Column 2: Motion (double-click to select from library)
+            motion = mapping.get('motion', '')
             motion_item = QTableWidgetItem(motion)
-            motion_item.setTextAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
+            motion_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
             motion_item.setFont(QFont("Arial", 11))
-            motion_item.setForeground(QColor(COLORS['WHITE']))
+            motion_item.setForeground(QColor(COLORS['RED_DARK']))
+            motion_item.setData(Qt.ItemDataRole.UserRole, motion)
             motion_item.setFlags(Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
-            self.table.setItem(row, 0, motion_item)
-            
-            # FIXED: Column 1: Centered red arrow → (NOT editable, NOT selectable)
-            arrow_item = QTableWidgetItem("→")
-            arrow_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-            arrow_item.setFont(QFont("Arial", 16, QFont.Weight.Bold))
-            arrow_item.setForeground(QColor("#ff1a1a"))  # Red arrow
-            arrow_item.setFlags(Qt.ItemFlag.ItemIsEnabled)  # Not selectable
-            self.table.setItem(row, 1, arrow_item)
-            
-            # Column 2: Key/Action (clean display, center-aligned, editable)
-            action_display = str(action).upper() if action else "None"
-            action_item = QTableWidgetItem(action_display)
-            action_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-            action_item.setFont(QFont("Arial", 11, QFont.Weight.Bold))
-            action_item.setForeground(QColor(COLORS['RED_BRIGHT']))
-            action_item.setData(Qt.ItemDataRole.UserRole, action)  # Store raw action for editing
-            self.table.setItem(row, 2, action_item)
+            self.table.setItem(row, 2, motion_item)
     
     def _edit_mapping(self, row: int, column: int):
-        """FIXED: Edit mapping cell (double-click handler) - works on column 2 (Key/Action)."""
-        if column != 2:  # Only column 2 (Key/Action) is editable
+        """v3: Edit mapping - Column 0 (Name) is editable, Column 1 (Control) opens KeySelector, Column 2 (Motion) opens MotionLibrary."""
+        if column == 0:
+            # Name is directly editable
+            self.table.editItem(self.table.item(row, 0))
             return
-        
-        # Get current action
-        current_item = self.table.item(row, 2)
-        current_action = current_item.data(Qt.ItemDataRole.UserRole) or ""
-        
-        # Open key selector dialog
-        dialog = KeySelectorDialog(self, current_action)
-        if dialog.exec() == QDialog.DialogCode.Accepted:
-            new_action = dialog.get_action()
+        elif column == 1:
+            # Control: Open KeySelectorDialog
+            current_item = self.table.item(row, 1)
+            current_control = current_item.data(Qt.ItemDataRole.UserRole) or ""
             
-            # Update display and data
-            action_display = str(new_action).upper() if new_action else "None"
-            current_item.setText(action_display)
-            current_item.setData(Qt.ItemDataRole.UserRole, new_action)
+            dialog = KeySelectorDialog(self, current_control)
+            if dialog.exec() == QDialog.DialogCode.Accepted:
+                new_control = dialog.get_action()
+                control_display = str(new_control).upper() if new_control else "None"
+                current_item.setText(control_display)
+                current_item.setData(Qt.ItemDataRole.UserRole, new_control)
+                self._save_profile()
+        elif column == 2:
+            # Motion: Open MotionLibraryDialog
+            from ..motion_library_dialog import MotionLibraryDialog
             
-            # Auto-save
-            self._save_profile()
+            dialog = MotionLibraryDialog(self)
+            dialog.motion_selected.connect(lambda motion_id: self._update_motion(row, motion_id))
+            dialog.exec()
     
     def highlight_row(self, motion_name: str):
-        """FIXED: Flash entire row bright red (#ff3333) for 800ms when gesture triggers.
-        Public method for main app integration.
+        """v3: Flash entire row bright red (#ff3333) for 800ms when gesture triggers.
+        Matches against motion field (column 2).
         """
         from PyQt6.QtCore import QTimer
         
-        # Find row by motion name
+        # Find row by motion name (column 2)
         for row in range(self.table.rowCount()):
-            item = self.table.item(row, 0)
-            if item and item.text() == motion_name:
+            motion_item = self.table.item(row, 2)
+            if motion_item and motion_item.data(Qt.ItemDataRole.UserRole) == motion_name:
                 # Store original backgrounds
-                original_bg_0 = item.background()
+                original_bg_0 = self.table.item(row, 0).background()
                 original_bg_1 = self.table.item(row, 1).background()
-                original_bg_2 = self.table.item(row, 2).background()
+                original_bg_2 = motion_item.background()
                 
                 # Flash bright red (#ff3333) - all columns
                 flash_color = QColor("#ff3333")
-                item.setBackground(flash_color)
+                self.table.item(row, 0).setBackground(flash_color)
                 self.table.item(row, 1).setBackground(flash_color)
-                self.table.item(row, 2).setBackground(flash_color)
+                motion_item.setBackground(flash_color)
                 
                 # Restore after 800ms
                 QTimer.singleShot(800, lambda: self._restore_row_colors(row, original_bg_0, original_bg_1, original_bg_2))
@@ -228,64 +243,92 @@ class MappingTable(QWidget):
             self.table.item(row, 1).setBackground(bg_1)
             self.table.item(row, 2).setBackground(bg_2)
     
+    def _update_motion(self, row: int, motion_id: str):
+        """Update motion field after selecting from library."""
+        # Extract motion name from motion_id (e.g., "static/hadoken" -> "hadoken")
+        motion_name = motion_id.split('/')[-1]
+        
+        motion_item = self.table.item(row, 2)
+        motion_item.setText(motion_name)
+        motion_item.setData(Qt.ItemDataRole.UserRole, motion_name)
+        self._save_profile()
+        
+        logger.info(f"Updated motion in row {row}: {motion_name}")
+    
     def _add_mapping(self):
-        """Add a new mapping row."""
+        """v3: Add new mapping with Name, Control, and Motion."""
         if not self.profile_path:
             QMessageBox.warning(self, "Warning", "No profile loaded!")
             return
         
-        motion_name, ok = QInputDialog.getText(
+        # Get display name
+        name, ok = QInputDialog.getText(
             self, "New Mapping",
-            "Enter motion name:"
+            "Enter display name (e.g., 'Hadoken Attack'):"
         )
         
-        if not ok or not motion_name:
+        if not ok or not name:
             return
         
-        motion_name = motion_name.strip()
-        if not motion_name:
+        name = name.strip()
+        if not name:
             return
         
-        # Open key selector
-        dialog = KeySelectorDialog(self, "")
-        if dialog.exec() != QDialog.DialogCode.Accepted:
+        # Open key selector for control
+        control_dialog = KeySelectorDialog(self, "")
+        if control_dialog.exec() != QDialog.DialogCode.Accepted:
             return
         
-        action = dialog.get_action()
+        control = control_dialog.get_action()
         
-        # FIXED: Add to table (3 columns with red arrow)
+        # Open motion library for motion
+        from ..motion_library_dialog import MotionLibraryDialog
+        motion_dialog = MotionLibraryDialog(self)
+        if motion_dialog.exec() != QDialog.DialogCode.Accepted:
+            return
+        
+        motion_id = motion_dialog.get_selected_motion_id()
+        if not motion_id:
+            return
+        
+        # Extract motion name from motion_id
+        motion = motion_id.split('/')[-1] if motion_id else ''
+        
+        # Add to table (v3 format: Name | Control | Motion)
         row = self.table.rowCount()
         self.table.insertRow(row)
         
-        # Column 0: Motion Name
-        motion_item = QTableWidgetItem(motion_name)
-        motion_item.setTextAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
+        # Column 0: Name (editable)
+        name_item = QTableWidgetItem(name)
+        name_item.setTextAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
+        name_item.setFont(QFont("Arial", 11))
+        name_item.setForeground(QColor(COLORS['WHITE']))
+        name_item.setFlags(Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable | Qt.ItemFlag.ItemIsEditable)
+        self.table.setItem(row, 0, name_item)
+        
+        # Column 1: Control
+        control_display = str(control).upper() if control else "None"
+        control_item = QTableWidgetItem(control_display)
+        control_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+        control_item.setFont(QFont("Arial", 11, QFont.Weight.Bold))
+        control_item.setForeground(QColor(COLORS['RED_BRIGHT']))
+        control_item.setData(Qt.ItemDataRole.UserRole, control)
+        control_item.setFlags(Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
+        self.table.setItem(row, 1, control_item)
+        
+        # Column 2: Motion
+        motion_item = QTableWidgetItem(motion)
+        motion_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
         motion_item.setFont(QFont("Arial", 11))
-        motion_item.setForeground(QColor(COLORS['WHITE']))
+        motion_item.setForeground(QColor(COLORS['RED_DARK']))
+        motion_item.setData(Qt.ItemDataRole.UserRole, motion)
         motion_item.setFlags(Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
-        self.table.setItem(row, 0, motion_item)
-        
-        # Column 1: Centered red arrow →
-        arrow_item = QTableWidgetItem("→")
-        arrow_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-        arrow_item.setFont(QFont("Arial", 16, QFont.Weight.Bold))
-        arrow_item.setForeground(QColor("#ff1a1a"))
-        arrow_item.setFlags(Qt.ItemFlag.ItemIsEnabled)
-        self.table.setItem(row, 1, arrow_item)
-        
-        # Column 2: Key/Action
-        action_display = str(action).upper() if action else "None"
-        action_item = QTableWidgetItem(action_display)
-        action_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-        action_item.setFont(QFont("Arial", 11, QFont.Weight.Bold))
-        action_item.setForeground(QColor(COLORS['RED_BRIGHT']))
-        action_item.setData(Qt.ItemDataRole.UserRole, action)
-        self.table.setItem(row, 2, action_item)
+        self.table.setItem(row, 2, motion_item)
         
         # Auto-save
         self._save_profile()
         
-        logger.info(f"Added mapping: {motion_name} → {action}")
+        logger.info(f"Added mapping: {name} → {control} ({motion})")
     
     def _remove_mapping(self):
         """Remove selected mapping row."""
@@ -315,19 +358,23 @@ class MappingTable(QWidget):
             logger.info(f"Removed mapping: {motion_name}")
     
     def _save_profile(self):
-        """FIXED: Auto-save current profile to .yaml file (3-column table)."""
+        """v3: Auto-save current profile to .yaml file in v3 format (list of {name, control, motion})."""
         if not self.profile_path:
             return
         
-        # Collect mappings from table (3 columns - action is in column 2)
-        mappings = {}
+        # Collect mappings from table in v3 format
+        mappings = []
         for row in range(self.table.rowCount()):
-            motion = self.table.item(row, 0).text()
-            action_item = self.table.item(row, 2)  # Column 2 has the action
-            action = action_item.data(Qt.ItemDataRole.UserRole) or ""
+            name = self.table.item(row, 0).text()
+            control = self.table.item(row, 1).data(Qt.ItemDataRole.UserRole) or ""
+            motion = self.table.item(row, 2).data(Qt.ItemDataRole.UserRole) or ""
             
-            if action:
-                mappings[motion] = action
+            if name and control and motion:
+                mappings.append({
+                    'name': name,
+                    'control': control,
+                    'motion': motion
+                })
         
         # Update profile data
         self.profile_data['mappings'] = mappings

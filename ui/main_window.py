@@ -227,6 +227,14 @@ class MotionPlayMainWindow(QMainWindow):
         self.edit_btn.clicked.connect(self._open_profile_manager)
         layout.addWidget(self.edit_btn)
         
+        # v2: Motion Library button
+        self.motion_lib_btn = QPushButton("Motion Library")
+        self.motion_lib_btn.setObjectName("actionButton")
+        self.motion_lib_btn.setFont(QFont("Arial", 12))
+        self.motion_lib_btn.setMinimumHeight(45)
+        self.motion_lib_btn.clicked.connect(self._open_motion_library)
+        layout.addWidget(self.motion_lib_btn)
+        
         layout.addStretch()
         
         # Exit button
@@ -312,4 +320,10 @@ class MotionPlayMainWindow(QMainWindow):
         dialog = ProfileManagerDialog(self, self.config)
         dialog.set_active_profile(self.current_profile)  # Pass current active profile
         dialog.profile_changed.connect(self._on_profile_changed)
+        dialog.exec()
+    
+    def _open_motion_library(self):
+        """v2: Open Motion Library dialog for browsing available motions."""
+        from .motion_library_dialog import MotionLibraryDialog
+        dialog = MotionLibraryDialog(self)
         dialog.exec()

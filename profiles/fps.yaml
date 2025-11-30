@@ -1,38 +1,14 @@
-# MotionPlay Profile: FPS (First-Person Shooter)
-# Optimized for FPS games (CS:GO, Valorant, Call of Duty, etc.)
-
 name: fps
-
-# FPS motion mappings - aggressive run-and-gun style
-# Optimized for CS:GO, Valorant, Call of Duty, Apex Legends
-
 mappings:
-  # Combat
-  Fist: left_click # Fire weapon
-  Open_Palm: right_click # Aim down sights / Scope
-  Closed_Fist: v # Melee attack
-
-  # Movement
-  Victory: space # Jump
-  Thumb_Down: c # Crouch / Slide
-  Thumb_Up: w # Sprint forward
-  Pointing_Left: a # Strafe left
-  Pointing_Right: d # Strafe right
-
-  # Weapon Actions
-  Peace: r # Reload
-  Two_Fingers: g # Grenade
-  Three_Fingers: 1 # Switch to primary
-
-  # Abilities (Valorant/Apex style)
-  Rock: q # Ability 1
-  ILoveYou: e # Ability 2 / Interact
-  Shaka: f # Ultimate ability
-
-  # Quick Actions
-  Pointing_Up_Thumb: x # Ping / Mark
-  Thumb_Index_Crossed: z # Tactical equipment
-
-  # System
-  Closed_Fist_Raised: tab # Scoreboard
-  Palm_Up: m # Map
+  - name: Grenade Throw
+    control: g
+    motion: hadoken
+  - name: Melee Attack
+    control: v
+    motion: punch_forward
+  - name: Special Ability
+    control: q
+    motion: kamehameha
+  - name: Reload
+    control: r
+    motion: uppercut

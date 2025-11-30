@@ -1,41 +1,11 @@
-# MotionPlay Profile: Racing
-# Optimized for racing games (Forza, Gran Turismo, Need for Speed, etc.)
-
 name: racing
-
-# Racing motion mappings - arcade and simulation
-# Optimized for Forza, Gran Turismo, Need for Speed, Dirt Rally
-
 mappings:
-  # Core Controls
-  Thumb_Up: w # Accelerate / Throttle
-  Thumb_Down: s # Brake / Reverse
-  Pointing_Left: a # Steer left
-  Pointing_Right: d # Steer right
-
-  # Racing Actions
-  Fist: space # Handbrake / E-brake / Drift
-  Open_Palm: shift # Nitrous / Boost
-  Closed_Fist: x # Reset car
-
-  # Manual Transmission
-  Victory: e # Shift up
-  Peace: q # Shift down
-  Two_Fingers: r # Clutch
-
-  # View Control
-  Rock: c # Change camera view
-  Shaka: v # Look back / Rear view
-  ILoveYou: left_click # Free look
-
-  # Assists
-  Three_Fingers: t # Traction control toggle
-  Thumb_Index_Crossed: y # Rewind (Forza)
-
-  # Communication
-  Palm_Up: h # Horn
-  Pointing_Up_Thumb: l # Headlights
-
-  # System
-  Closed_Fist_Raised: esc # Pause
-  Pointing_Down: m # Map
+  - name: Nitro Boost
+    control: shift
+    motion: punch_forward
+  - name: Handbrake
+    control: space
+    motion: uppercut
+  - name: Horn
+    control: h
+    motion: hadoken

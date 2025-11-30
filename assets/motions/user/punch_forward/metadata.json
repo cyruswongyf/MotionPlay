@@ -1,0 +1,12 @@
+{
+  "motion_id": "user/punch_forward",
+  "display_name": "Forward Punch",
+  "description": "Custom trained forward punching motion",
+  "category": "basic_attack",
+  "difficulty": "easy",
+  "tags": ["punch", "basic", "custom"],
+  "preview_gif": "preview.gif",
+  "author": "User",
+  "created_date": "2026-01-15",
+  "version": "1.0"
+}

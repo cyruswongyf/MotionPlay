@@ -304,6 +304,57 @@ def main():
         app = QApplication(sys.argv)
         app.setApplicationName("MotionPlay")
         
+        # v3.0 NUCLEAR BLACK THEME — NEVER WHITE AGAIN
+        app.setStyle('Fusion')
+        
+        from PyQt6.QtGui import QPalette, QColor
+        palette = QPalette()
+        
+        # Define colors
+        dark = QColor("#0d0d0d")
+        red = QColor("#ff1a1a")
+        white = QColor("#ffffff")
+        
+        # Force ALL background roles to pure black
+        for role in [QPalette.ColorRole.Window, QPalette.ColorRole.Base, QPalette.ColorRole.AlternateBase,
+                     QPalette.ColorRole.ToolTipBase, QPalette.ColorRole.Button, QPalette.ColorRole.Light,
+                     QPalette.ColorRole.Midlight, QPalette.ColorRole.Dark, QPalette.ColorRole.Shadow]:
+            palette.setColor(role, dark)
+        
+        # Force ALL text roles to white
+        for role in [QPalette.ColorRole.Text, QPalette.ColorRole.WindowText, QPalette.ColorRole.ButtonText,
+                     QPalette.ColorRole.HighlightedText, QPalette.ColorRole.ToolTipText, QPalette.ColorRole.BrightText]:
+            palette.setColor(role, white)
+        
+        # Red highlights
+        for role in [QPalette.ColorRole.Highlight, QPalette.ColorRole.Link]:
+            palette.setColor(role, red)
+        
+        app.setPalette(palette)
+        
+        # Final kill switch: global stylesheet that overrides EVERYTHING
+        app.setStyleSheet("""
+            QMainWindow, QDialog, QWidget { 
+                background-color: #0d0d0d; 
+                color: #ffffff;
+            }
+            QLabel { 
+                color: #ffffff; 
+                background: transparent;
+            }
+            QToolTip { 
+                background-color: #0d0d0d; 
+                color: #ffffff; 
+                border: 1px solid #ff1a1a; 
+            }
+            QScrollArea {
+                background-color: #0d0d0d;
+            }
+            QScrollBar:vertical, QScrollBar:horizontal {
+                background-color: #1a1a1a;
+            }
+        """)
+        
         # Create and run app
         motion_app = MotionPlayApp(config, offline_mode=args.offline)
         exit_code = motion_app.run(app)

@@ -1,39 +1,14 @@
-# MotionPlay Profile: MOBA (Multiplayer Online Battle Arena)
-# Optimized for MOBA games (League of Legends, Dota 2, etc.)
-
 name: moba
-
-# MOBA motion mappings - fast ability casting
-# Optimized for League of Legends, Dota 2, Smite
-
 mappings:
-  # Core Abilities (QWER)
-  Fist: q # Ability Q (Primary)
-  Open_Palm: w # Ability W (Secondary)
-  Victory: e # Ability E (Utility)
-  Thumb_Up: r # Ultimate R
-
-  # Summoner Spells / Items
-  Two_Fingers: d # Summoner 1 / Item D
-  Three_Fingers: f # Summoner 2 / Item F
-  Peace: space # Center camera on champion
-
-  # Item Actives
-  Pointing_Up_Thumb: 1 # Item slot 1
-  Thumb_Index_Crossed: 2 # Item slot 2
-  Rock: 3 # Item slot 3
-
-  # Quick Actions
-  Thumb_Down: s # Stop / Hold position
-  Closed_Fist: a # Attack move
-  Pointing_Left: left_click # Left click (targeting)
-  Pointing_Right: shift # Self-cast modifier
-
-  # Communication
-  Shaka: g # Ping
-  ILoveYou: v # Smart ping
-  Palm_Up: y # Chat
-
-  # System
-  Closed_Fist_Raised: tab # Scoreboard
-  Pointing_Down: b # Recall to base
+  - name: Skill Q
+    control: q
+    motion: hadoken
+  - name: Skill W
+    control: w
+    motion: shoryuken
+  - name: Skill E
+    control: e
+    motion: punch_forward
+  - name: Ultimate R
+    control: r
+    motion: kamehameha
