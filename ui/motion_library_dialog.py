@@ -517,7 +517,7 @@ class MotionLibraryDialog(BlackDialog):
     def _on_create_motion(self):
         """Handle + button: create new motion."""
         dialog = RecordingDialog(self)
-        if dialog.exec() == QDialog.DialogCode.Accepted:
+        if dialog.exec() == BlackDialog.DialogCode.Accepted:
             # Reload motions to show new one
             self._load_motions()
             logger.info("New motion created")
