@@ -5,17 +5,18 @@ Modal dialog for selecting keyboard keys or mouse actions.
 
 import logging
 from PyQt6.QtWidgets import (
-    QDialog, QVBoxLayout, QHBoxLayout, QLabel, QPushButton
+    QVBoxLayout, QHBoxLayout, QLabel, QPushButton
 )
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
+from ..base import BlackDialog
 from ..styles.common import COLORS
 from ..styles.profile_manager import PROFILE_MANAGER_STYLESHEET
 
 logger = logging.getLogger(__name__)
 
 
-class KeySelectorDialog(QDialog):
+class KeySelectorDialog(BlackDialog):
     """
     Popup dialog for selecting keyboard keys or mouse actions.
     Returns action in format: "keyboard:w", "mouse:left_click", etc.

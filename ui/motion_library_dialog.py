@@ -8,13 +8,23 @@ import logging
 from pathlib import Path
 from typing import Dict, List, Optional, Set
 from PyQt6.QtWidgets import (
-    QDialog, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
+    QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
     QLineEdit, QWidget, QScrollArea, QGridLayout,
     QFrame, QMessageBox, QCheckBox
 )
 from PyQt6.QtCore import Qt, pyqtSignal, QSize, QEvent
 from PyQt6.QtGui import QFont, QPixmap, QPainter, QColor, QPen
+from .base import BlackDialog
 from .styles.common import COLORS
+from .styles.motion_library import (
+    MOTION_LIBRARY_STYLESHEET,
+    MOTION_CARD_STYLE,
+    MOTION_CARD_HOVER_STYLE,
+    CLOSE_BTN_STYLE,
+    FLOATING_ADD_BTN_STYLE,
+    TAG_CHECKBOX_STYLE,
+    CLEAR_FILTERS_BTN_STYLE
+)
 from .motion_edit_dialog import MotionEditDialog
 from .recording_dialog import RecordingDialog
 
@@ -130,17 +140,7 @@ class MotionCard(QFrame):
     
     def _apply_styles(self):
         """Apply card styling."""
-        self.setStyleSheet(f"""
-            QFrame#motionCard {{
-                background-color: {COLORS['BG_BLACK']};
-                border: 2px solid {COLORS['RED_DARK']};
-                border-radius: 8px;
-            }}
-            QFrame#motionCard:hover {{
-                background-color: {COLORS['GRAY_DARK']};
-                border: 3px solid {COLORS['RED_BRIGHT']};
-            }}
-        """)
+        self.setStyleSheet(MOTION_CARD_STYLE)
     
     def mousePressEvent(self, event):
         """Handle single click (will be overridden by double-click)."""
@@ -156,12 +156,7 @@ class MotionCard(QFrame):
     
     def enterEvent(self, event):
         """Handle mouse enter."""
-        self.setStyleSheet(f"""
-            QFrame#motionCard {{
-                background-color: {COLORS['GRAY_DARK']};
-                border: 3px solid {COLORS['RED_BRIGHT']};
-            }}
-        """)
+        self.setStyleSheet(MOTION_CARD_HOVER_STYLE)
         super().enterEvent(event)
     
     def leaveEvent(self, event):
@@ -170,7 +165,7 @@ class MotionCard(QFrame):
         super().leaveEvent(event)
 
 
-class MotionLibraryDialog(QDialog):
+class MotionLibraryDialog(BlackDialog):
     """
     MotionPlay v3.0 FINAL FORM — Professional Motion Library.
     Sidebar filters, responsive grid, floating + button.
@@ -254,24 +249,32 @@ class MotionLibraryDialog(QDialog):
         content_widget.setLayout(content_layout)
         main_layout.addWidget(content_widget, 1)
         
+        # Bottom bar with Close button (matching Profile Manager style)
+        bottom_layout = QHBoxLayout()
+        bottom_layout.setContentsMargins(30, 15, 30, 15)
+        bottom_layout.setSpacing(12)
+        
+        bottom_layout.addStretch()
+        
+        close_btn = QPushButton("Close")
+        close_btn.setMinimumSize(140, 50)
+        close_btn.setFont(QFont("Arial", 11, QFont.Weight.Bold))
+        close_btn.setStyleSheet(CLOSE_BTN_STYLE)
+        close_btn.clicked.connect(self.reject)
+        bottom_layout.addWidget(close_btn)
+        
+        bottom_widget = QWidget()
+        bottom_widget.setLayout(bottom_layout)
+        bottom_widget.setStyleSheet(f"background-color: {COLORS['PURE_BLACK']}; border-top: 2px solid {COLORS['RED_DARK']};")
+        main_layout.addWidget(bottom_widget)
+        
         # Floating + button (will be positioned in resizeEvent)
         self.add_button = QPushButton("+")
         self.add_button.setParent(self)
         self.add_button.setFixedSize(70, 70)
         self.add_button.setFont(QFont("Arial", 32, QFont.Weight.Bold))
         self.add_button.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.add_button.setStyleSheet(f"""
-            QPushButton {{
-                background-color: {COLORS['RED_PRIMARY']};
-                color: {COLORS['WHITE']};
-                border: 4px solid {COLORS['RED_BRIGHT']};
-                border-radius: 35px;
-            }}
-            QPushButton:hover {{
-                background-color: {COLORS['RED_BRIGHT']};
-                border: 4px solid {COLORS['WHITE']};
-            }}
-        """)
+        self.add_button.setStyleSheet(FLOATING_ADD_BTN_STYLE)
         self.add_button.clicked.connect(self._on_create_motion)
         self.add_button.show()
     
@@ -297,23 +300,7 @@ class MotionLibraryDialog(QDialog):
         for tag in sorted(self.ALL_TAGS):
             checkbox = QCheckBox(tag.upper())
             checkbox.setFont(QFont("Arial", 11))
-            checkbox.setStyleSheet(f"""
-                QCheckBox {{
-                    color: {COLORS['WHITE']};
-                    spacing: 8px;
-                }}
-                QCheckBox::indicator {{
-                    width: 20px;
-                    height: 20px;
-                    border: 2px solid {COLORS['RED_DARK']};
-                    border-radius: 3px;
-                    background-color: {COLORS['GRAY_DARK']};
-                }}
-                QCheckBox::indicator:checked {{
-                    background-color: {COLORS['RED_PRIMARY']};
-                    border: 2px solid {COLORS['RED_BRIGHT']};
-                }}
-            """)
+            checkbox.setStyleSheet(TAG_CHECKBOX_STYLE)
             checkbox.stateChanged.connect(self._on_filter_changed)
             self.tag_checkboxes[tag] = checkbox
             sidebar_layout.addWidget(checkbox)
@@ -324,17 +311,7 @@ class MotionLibraryDialog(QDialog):
         clear_btn = QPushButton("Clear Filters")
         clear_btn.setMinimumHeight(40)
         clear_btn.setFont(QFont("Arial", 11, QFont.Weight.Bold))
-        clear_btn.setStyleSheet(f"""
-            QPushButton {{
-                background-color: {COLORS['GRAY_DARK']};
-                color: {COLORS['WHITE']};
-                border: 2px solid {COLORS['RED_DARK']};
-                border-radius: 5px;
-            }}
-            QPushButton:hover {{
-                background-color: {COLORS['RED_DARK']};
-            }}
-        """)
+        clear_btn.setStyleSheet(CLEAR_FILTERS_BTN_STYLE)
         clear_btn.clicked.connect(self._clear_filters)
         sidebar_layout.addWidget(clear_btn)
         
@@ -513,10 +490,29 @@ class MotionLibraryDialog(QDialog):
         dialog.exec()
     
     def _on_motion_select(self, motion_id: str):
-        """Handle double-click: select and close."""
+        """Handle double-click: select and close with thick red border highlight."""
+        self.selected_motion_id = motion_id
+        
+        # Highlight selected card with thick red border
+        for card in self.motion_cards:
+            if card.motion_id == motion_id:
+                card.setStyleSheet(f"""
+                    QFrame#motionCard {{
+                        background-color: {COLORS['GRAY_DARK']};
+                        border: 5px solid {COLORS['RED_BRIGHT']};
+                        border-radius: 8px;
+                    }}
+                """)
+            else:
+                card._apply_styles()  # Reset others
+        
         logger.info(f"Motion selected: {motion_id}")
         self.motion_selected.emit(motion_id)
         self.accept()
+    
+    def get_selected_motion_id(self) -> Optional[str]:
+        """Get the selected motion ID (for use after dialog closes)."""
+        return getattr(self, 'selected_motion_id', None)
     
     def _on_create_motion(self):
         """Handle + button: create new motion."""
@@ -547,51 +543,14 @@ class MotionLibraryDialog(QDialog):
         logger.info(f"Removed motion: {motion_id}")
     
     def resizeEvent(self, event):
-        """Position floating button on resize."""
+        """Position floating button on resize - moved up 80px to not overlap Close button."""
         super().resizeEvent(event)
         if self.add_button:
-            # Position bottom-right with 30px margin
+            # Position bottom-right with 30px margin, 80px up from bottom
             x = self.width() - self.add_button.width() - 30
-            y = self.height() - self.add_button.height() - 30
+            y = self.height() - self.add_button.height() - 110  # 30 + 80 = 110px from bottom
             self.add_button.move(x, y)
     
     def _apply_styles(self):
         """Apply v3.0 nuclear black theme."""
-        self.setStyleSheet(f"""
-            QDialog {{
-                background-color: {COLORS['PURE_BLACK']};
-            }}
-            
-            QLineEdit {{
-                background-color: {COLORS['GRAY_DARK']};
-                color: {COLORS['WHITE']};
-                border: 2px solid {COLORS['RED_DARK']};
-                border-radius: 8px;
-                padding: 10px 15px;
-            }}
-            QLineEdit:focus {{
-                border: 3px solid {COLORS['RED_BRIGHT']};
-            }}
-            
-            QScrollArea {{
-                background-color: {COLORS['PURE_BLACK']};
-                border: none;
-            }}
-            
-            QScrollBar:vertical {{
-                background-color: {COLORS['GRAY_DARK']};
-                width: 12px;
-                border-radius: 6px;
-            }}
-            QScrollBar::handle:vertical {{
-                background-color: {COLORS['RED_DARK']};
-                border-radius: 6px;
-                min-height: 30px;
-            }}
-            QScrollBar::handle:vertical:hover {{
-                background-color: {COLORS['RED_PRIMARY']};
-            }}
-            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{
-                height: 0px;
-            }}
-        """)
+        self.setStyleSheet(MOTION_LIBRARY_STYLESHEET)

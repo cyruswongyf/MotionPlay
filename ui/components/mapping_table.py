@@ -9,12 +9,43 @@ from pathlib import Path
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
     QTableWidget, QTableWidgetItem, QHeaderView, QAbstractItemView,
-    QInputDialog, QMessageBox, QDialog
+    QInputDialog, QMessageBox, QDialog, QStyledItemDelegate, QLineEdit
 )
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QFont, QColor
 from ..styles.common import COLORS
+from ..styles.mapping_table import MAPPING_TABLE_STYLESHEET
 from .key_selector_dialog import KeySelectorDialog
+
+logger = logging.getLogger(__name__)
+
+
+class NoOverlapDelegate(QStyledItemDelegate):
+    """Custom delegate to prevent text overlap when editing Name column."""
+    
+    def createEditor(self, parent, option, index):
+        """Create editor with proper styling - no overlap."""
+        editor = QLineEdit(parent)
+        editor.setStyleSheet(f"""
+            QLineEdit {{
+                background-color: #333333;
+                color: white;
+                border: 2px solid {COLORS['RED_BRIGHT']};
+                border-radius: 3px;
+                padding: 4px 8px;
+                font-size: 11pt;
+            }}
+        """)
+        return editor
+    
+    def setEditorData(self, editor, index):
+        """Set editor data from model."""
+        value = index.model().data(index, Qt.ItemDataRole.DisplayRole)
+        editor.setText(str(value) if value else "")
+    
+    def setModelData(self, editor, model, index):
+        """Save editor data to model."""
+        model.setData(index, editor.text(), Qt.ItemDataRole.DisplayRole)
 
 logger = logging.getLogger(__name__)
 
@@ -67,12 +98,17 @@ class MappingTable(QWidget):
         self.table.setColumnCount(3)
         self.table.setHorizontalHeaderLabels(["Name", "Control", "Motion"])
         self.table.setFont(QFont("Arial", 11))
-        self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+        self.table.setEditTriggers(QAbstractItemView.EditTrigger.DoubleClicked)  # Enable editing
         self.table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         self.table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
         self.table.cellDoubleClicked.connect(self._edit_mapping)
+        self.table.itemChanged.connect(self._on_item_changed)  # Track name changes
         self.table.setShowGrid(True)
         self.table.setAlternatingRowColors(True)
+        self.table.setStyleSheet(MAPPING_TABLE_STYLESHEET)
+        
+        # Set NoOverlapDelegate for Name column (column 0) - FINAL FIX
+        self.table.setItemDelegateForColumn(0, NoOverlapDelegate(self.table))
         
         # v3: Column sizing - Name | Control | Motion (all stretch)
         header = self.table.horizontalHeader()
@@ -185,11 +221,21 @@ class MappingTable(QWidget):
             motion_item.setFlags(Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
             self.table.setItem(row, 2, motion_item)
     
+    def _on_item_changed(self, item: QTableWidgetItem):
+        """Handle item changes (for Name column inline editing)."""
+        if item and item.column() == 0:  # Name column changed
+            # Only save if row is complete (all 3 columns exist)
+            row = item.row()
+            if (self.table.item(row, 0) and 
+                self.table.item(row, 1) and 
+                self.table.item(row, 2)):
+                self._save_profile()
+                logger.info(f"Updated mapping name: {item.text()}")
+    
     def _edit_mapping(self, row: int, column: int):
         """v3: Edit mapping - Column 0 (Name) is editable, Column 1 (Control) opens KeySelector, Column 2 (Motion) opens MotionLibrary."""
         if column == 0:
-            # Name is directly editable
-            self.table.editItem(self.table.item(row, 0))
+            # Name is directly editable via double-click (handled by EditTrigger)
             return
         elif column == 1:
             # Control: Open KeySelectorDialog
@@ -365,9 +411,17 @@ class MappingTable(QWidget):
         # Collect mappings from table in v3 format
         mappings = []
         for row in range(self.table.rowCount()):
-            name = self.table.item(row, 0).text()
-            control = self.table.item(row, 1).data(Qt.ItemDataRole.UserRole) or ""
-            motion = self.table.item(row, 2).data(Qt.ItemDataRole.UserRole) or ""
+            # Safety check: ensure all items exist
+            item_0 = self.table.item(row, 0)
+            item_1 = self.table.item(row, 1)
+            item_2 = self.table.item(row, 2)
+            
+            if not (item_0 and item_1 and item_2):
+                continue  # Skip incomplete rows
+            
+            name = item_0.text()
+            control = item_1.data(Qt.ItemDataRole.UserRole) or ""
+            motion = item_2.data(Qt.ItemDataRole.UserRole) or ""
             
             if name and control and motion:
                 mappings.append({

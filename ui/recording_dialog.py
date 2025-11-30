@@ -8,18 +8,19 @@ import cv2
 import numpy as np
 from pathlib import Path
 from PyQt6.QtWidgets import (
-    QDialog, QVBoxLayout, QHBoxLayout, QLabel,
+    QVBoxLayout, QHBoxLayout, QLabel,
     QPushButton, QLineEdit, QProgressBar, QWidget
 )
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal
 from PyQt6.QtGui import QFont, QPixmap, QImage
+from .base import BlackDialog
 from .styles.common import COLORS
 from .styles.recording_dialog import RECORDING_DIALOG_STYLESHEET
 
 logger = logging.getLogger(__name__)
 
 
-class RecordingDialog(QDialog):
+class RecordingDialog(BlackDialog):
     """
     Modal dialog for recording motion gestures.
     Features countdown, live camera preview, progress tracking, and saving.

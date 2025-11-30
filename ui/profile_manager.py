@@ -7,11 +7,12 @@ Professional gaming peripheral software aesthetic.
 import logging
 from pathlib import Path
 from PyQt6.QtWidgets import (
-    QDialog, QVBoxLayout, QHBoxLayout, QPushButton,
+    QVBoxLayout, QHBoxLayout, QPushButton,
     QSplitter, QWidget, QMessageBox
 )
 from PyQt6.QtCore import Qt, pyqtSignal, QTimer
 from PyQt6.QtGui import QFont
+from .base import BlackDialog
 from .components import ProfileListWidget, MappingTable
 from .styles.common import COLORS
 from .styles.profile_manager import PROFILE_MANAGER_STYLESHEET
@@ -19,7 +20,7 @@ from .styles.profile_manager import PROFILE_MANAGER_STYLESHEET
 logger = logging.getLogger(__name__)
 
 
-class ProfileManagerDialog(QDialog):
+class ProfileManagerDialog(BlackDialog):
     """
     Clean profile manager dialog.
     Orchestrates ProfileListWidget and MappingTable components.

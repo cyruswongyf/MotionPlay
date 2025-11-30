@@ -8,11 +8,12 @@ import logging
 from typing import Optional
 import logging
 from PyQt6.QtWidgets import (
-    QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel,
+    QWidget, QVBoxLayout, QHBoxLayout, QLabel,
     QPushButton, QComboBox
 )
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal
 from PyQt6.QtGui import QImage, QPixmap, QFont
+from .base import BlackMainWindow
 from .styles.common import COLORS
 from .styles.main_window import MAIN_WINDOW_STYLESHEET
 from .recording_dialog import RecordingDialog
@@ -72,7 +73,7 @@ class TriggerOverlay(QWidget):
         self.hide_timer.start(800)  # Show for 800ms as specified
 
 
-class MotionPlayMainWindow(QMainWindow):
+class MotionPlayMainWindow(BlackMainWindow):
     """
     Main application window.
     Pure black + aggressive red theme.
@@ -213,13 +214,6 @@ class MotionPlayMainWindow(QMainWindow):
         layout.addSpacing(20)
         
         # Action buttons
-        self.record_btn = QPushButton("RECORD NEW MOTION")
-        self.record_btn.setObjectName("recordButton")
-        self.record_btn.setFont(QFont("Arial", 14, QFont.Weight.Bold))
-        self.record_btn.setMinimumHeight(55)
-        self.record_btn.clicked.connect(self._open_record_dialog)
-        layout.addWidget(self.record_btn)
-        
         self.edit_btn = QPushButton("Edit Profile")
         self.edit_btn.setObjectName("actionButton")
         self.edit_btn.setFont(QFont("Arial", 12))
@@ -309,11 +303,6 @@ class MotionPlayMainWindow(QMainWindow):
         self.profile_changed.emit(profile_name)
         logger.info(f"⚡ Main window synced to profile: {profile_name}")
         self.update_fps(self.current_fps)
-    
-    def _open_record_dialog(self):
-        """Open recording dialog."""
-        dialog = RecordingDialog(self, self.config)
-        dialog.exec()
     
     def _open_profile_manager(self):
         """FINAL CHANGE: Open profile manager with current active profile for auto-selection."""

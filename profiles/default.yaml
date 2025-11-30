@@ -1,11 +1,63 @@
-name: default
+name: MediaPipe Complete Pack
+description: Complete set of all MediaPipe built-in hand gestures
 mappings:
-  - name: Forward Punch
-    control: space
-    motion: punch_forward
-  - name: Uppercut
-    control: e
-    motion: uppercut
-  - name: Hadoken
-    control: "1"
-    motion: hadoken
+- name: Closed Fist
+  control: x
+  motion: closed_fist
+- name: Open Palm
+  control: shift
+  motion: open_palm
+- name: Pointing Up
+  control: w
+  motion: pointing_up
+- name: Thumb Up
+  control: e
+  motion: thumb_up
+- name: Thumb Down
+  control: q
+  motion: thumb_down
+- name: Victory
+  control: v
+  motion: victory
+- name: I Love You
+  control: '1'
+  motion: i_love_you
+- name: Rock
+  control: r
+  motion: rock
+- name: Call Me
+  control: c
+  motion: call_me
+- name: Okay
+  control: o
+  motion: okay
+- name: Pinch
+  control: p
+  motion: pinch
+- name: Swipe Right
+  control: d
+  motion: swipe_right
+- name: Swipe Left
+  control: a
+  motion: swipe_left
+- name: Swipe Up
+  control: space
+  motion: swipe_up
+- name: Swipe Down
+  control: ctrl
+  motion: swipe_down
+- name: Grab
+  control: g
+  motion: grab
+- name: Release
+  control: f
+  motion: release
+- name: Hadoken
+  control: '2'
+  motion: hadoken
+- name: Shoryuken
+  control: '3'
+  motion: shoryuken
+- name: Kamehameha
+  control: '4'
+  motion: kamehameha

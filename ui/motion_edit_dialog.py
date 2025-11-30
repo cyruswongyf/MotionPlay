@@ -1,215 +1,127 @@
 """
-Motion Edit Dialog — MotionPlay v3.0
-Professional motion metadata editor with preview upload and re-record functionality.
+Motion Edit Dialog — MotionPlay v3.0 FINAL RECKONING
+Simple, beautiful, no bugs. Complete redesign.
 """
 
 import json
 import logging
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Optional
 from PyQt6.QtWidgets import (
-    QDialog, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-    QLineEdit, QTextEdit, QFileDialog, QMessageBox, QWidget,
-    QScrollArea, QFrame
+    QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
+    QLineEdit, QTextEdit, QFileDialog, QWidget, QInputDialog
 )
-from PyQt6.QtCore import Qt, pyqtSignal, QSize
-from PyQt6.QtGui import QFont, QPixmap, QPainter, QColor
+from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtGui import QFont, QPixmap, QColor
+from .base import BlackDialog, show_warning, show_question, show_error
 from .styles.common import COLORS
 
 logger = logging.getLogger(__name__)
 
 
-class TagChip(QFrame):
-    """Tag chip widget with remove button."""
-    
-    removed = pyqtSignal(str)  # Emits tag name
-    
-    def __init__(self, tag: str, parent=None):
-        super().__init__(parent)
-        self.tag = tag
-        
-        self.setObjectName("tagChip")
-        self.setFixedHeight(32)
-        
-        layout = QHBoxLayout(self)
-        layout.setContentsMargins(10, 5, 10, 5)
-        layout.setSpacing(8)
-        
-        # Tag label
-        label = QLabel(tag)
-        label.setFont(QFont("Arial", 10, QFont.Weight.Bold))
-        label.setStyleSheet(f"color: {COLORS['WHITE']}; background: transparent;")
-        layout.addWidget(label)
-        
-        # Remove button
-        remove_btn = QPushButton("×")
-        remove_btn.setFixedSize(20, 20)
-        remove_btn.setFont(QFont("Arial", 14, QFont.Weight.Bold))
-        remove_btn.setStyleSheet(f"""
-            QPushButton {{
-                background-color: {COLORS['RED_DARK']};
-                color: {COLORS['WHITE']};
-                border: none;
-                border-radius: 10px;
-            }}
-            QPushButton:hover {{
-                background-color: {COLORS['RED_BRIGHT']};
-            }}
-        """)
-        remove_btn.clicked.connect(lambda: self.removed.emit(self.tag))
-        layout.addWidget(remove_btn)
-        
-        self.setStyleSheet(f"""
-            QFrame#tagChip {{
-                background-color: {COLORS['RED_PRIMARY']};
-                border: 1px solid {COLORS['RED_BRIGHT']};
-                border-radius: 16px;
-            }}
-        """)
-
-
-class MotionEditDialog(QDialog):
+class MotionEditDialog(BlackDialog):
     """
-    Professional motion metadata editor.
-    Edit name, description, tags, preview image, and re-record motion.
+    Simple, beautiful motion editor.
+    Shows current values with Edit buttons - popup inline editing.
     """
     
     motion_saved = pyqtSignal(str)  # Emits motion name
     motion_deleted = pyqtSignal(str)  # Emits motion name
     
-    def __init__(self, motion_name: Optional[str] = None, parent=None):
+    def __init__(self, motion_name: str, parent=None):
+        """
+        Initialize motion edit dialog.
+        
+        Args:
+            motion_name: Name of motion to edit (required - folder name in user/)
+            parent: Parent widget
+        """
         super().__init__(parent)
+        
+        if not motion_name:
+            raise ValueError("motion_name is required for editing")
         
         self.motion_name = motion_name
         self.motion_dir = Path("assets/motions/user")
+        self.motion_path = self.motion_dir / motion_name
+        
+        # Current data
+        self.display_name = ""
+        self.description = ""
         self.tags = []
         self.preview_path = None
         
-        self.setWindowTitle("Edit Motion" if motion_name else "Create New Motion")
-        self.setMinimumSize(700, 650)
+        self.setWindowTitle(f"Edit Motion: {motion_name}")
+        self.setMinimumSize(700, 800)
         self.setModal(True)
         
+        # Load data first
+        self._load_motion_data()
+        
+        # Then build UI
         self._init_ui()
-        self._apply_styles()
         
-        if motion_name:
-            self._load_motion_data()
-        
-        logger.info(f"Motion Edit Dialog opened: {motion_name or 'New'}")
+        logger.info(f"Motion Edit Dialog opened: {motion_name}")
     
     def _init_ui(self):
-        """Initialize UI."""
+        """Initialize beautiful simple UI."""
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(25, 25, 25, 25)
-        layout.setSpacing(20)
+        layout.setContentsMargins(30, 30, 30, 30)
+        layout.setSpacing(25)
         
         # Title
-        title = QLabel("EDIT MOTION" if self.motion_name else "CREATE NEW MOTION")
+        title = QLabel(f"EDIT MOTION: {self.motion_name.upper()}")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        title.setFont(QFont("Arial", 20, QFont.Weight.Bold))
-        title.setStyleSheet(f"color: {COLORS['RED_BRIGHT']}; letter-spacing: 2px;")
+        title.setFont(QFont("Arial", 22, QFont.Weight.Bold))
+        title.setStyleSheet(f"color: {COLORS['RED_BRIGHT']}; letter-spacing: 3px;")
         layout.addWidget(title)
         
-        # Preview image
-        preview_label = QLabel("PREVIEW")
-        preview_label.setFont(QFont("Arial", 11, QFont.Weight.Bold))
-        preview_label.setStyleSheet(f"color: {COLORS['WHITE']};")
-        layout.addWidget(preview_label)
+        layout.addSpacing(10)
         
-        preview_container = QHBoxLayout()
+        # Large preview in center
+        preview_container = QWidget()
+        preview_layout = QVBoxLayout(preview_container)
+        preview_layout.setContentsMargins(0, 0, 0, 0)
+        preview_layout.setSpacing(10)
         
-        self.preview_display = QLabel()
-        self.preview_display.setFixedSize(250, 200)
-        self.preview_display.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.preview_display.setStyleSheet(f"""
+        self.preview_label = QLabel()
+        self.preview_label.setFixedSize(400, 300)
+        self.preview_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.preview_label.setStyleSheet(f"""
             background-color: {COLORS['GRAY_DARK']};
-            border: 2px solid {COLORS['RED_DARK']};
-            border-radius: 8px;
+            border: 3px solid {COLORS['RED_DARK']};
+            border-radius: 10px;
         """)
-        self._set_placeholder_preview()
-        preview_container.addWidget(self.preview_display)
+        self._update_preview()
+        preview_layout.addWidget(self.preview_label, 0, Qt.AlignmentFlag.AlignCenter)
         
-        preview_buttons = QVBoxLayout()
-        preview_buttons.setSpacing(10)
+        # Change image button below preview
+        change_img_btn = QPushButton("Change Image/GIF")
+        change_img_btn.setMinimumHeight(50)
+        change_img_btn.setFixedWidth(400)
+        change_img_btn.setFont(QFont("Arial", 12, QFont.Weight.Bold))
+        change_img_btn.setStyleSheet(self._action_button_style())
+        change_img_btn.clicked.connect(self._change_preview)
+        preview_layout.addWidget(change_img_btn, 0, Qt.AlignmentFlag.AlignCenter)
         
-        upload_btn = QPushButton("Upload Preview")
-        upload_btn.setMinimumHeight(45)
-        upload_btn.setFont(QFont("Arial", 11))
-        upload_btn.setStyleSheet(self._button_style())
-        upload_btn.clicked.connect(self._upload_preview)
-        preview_buttons.addWidget(upload_btn)
+        layout.addWidget(preview_container)
         
-        self.rerecord_btn = QPushButton("Re-record Motion")
-        self.rerecord_btn.setMinimumHeight(45)
-        self.rerecord_btn.setFont(QFont("Arial", 11))
-        self.rerecord_btn.setStyleSheet(self._button_style())
-        self.rerecord_btn.clicked.connect(self._rerecord_motion)
-        self.rerecord_btn.setEnabled(bool(self.motion_name))
-        preview_buttons.addWidget(self.rerecord_btn)
+        layout.addSpacing(10)
         
-        preview_buttons.addStretch()
-        preview_container.addLayout(preview_buttons)
-        preview_container.addStretch()
+        # 5 clean sections with Edit buttons
+        self._add_field_row(layout, "NAME", self.display_name, self._edit_name)
+        self._add_field_row(layout, "DESCRIPTION", self.description or "No description", self._edit_description)
+        self._add_field_row(layout, "TAGS", ", ".join(self.tags) if self.tags else "No tags", self._edit_tags)
         
-        layout.addLayout(preview_container)
+        layout.addSpacing(10)
         
-        # Name field
-        name_label = QLabel("MOTION NAME")
-        name_label.setFont(QFont("Arial", 11, QFont.Weight.Bold))
-        name_label.setStyleSheet(f"color: {COLORS['WHITE']};")
-        layout.addWidget(name_label)
-        
-        self.name_input = QLineEdit()
-        self.name_input.setPlaceholderText("e.g., Forward Punch, Hadoken, Uppercut")
-        self.name_input.setMinimumHeight(45)
-        self.name_input.setFont(QFont("Arial", 12))
-        layout.addWidget(self.name_input)
-        
-        # Description field
-        desc_label = QLabel("DESCRIPTION")
-        desc_label.setFont(QFont("Arial", 11, QFont.Weight.Bold))
-        desc_label.setStyleSheet(f"color: {COLORS['WHITE']};")
-        layout.addWidget(desc_label)
-        
-        self.desc_input = QTextEdit()
-        self.desc_input.setPlaceholderText("Brief description of the motion...")
-        self.desc_input.setMinimumHeight(80)
-        self.desc_input.setMaximumHeight(120)
-        self.desc_input.setFont(QFont("Arial", 11))
-        layout.addWidget(self.desc_input)
-        
-        # Tags section
-        tags_label = QLabel("TAGS")
-        tags_label.setFont(QFont("Arial", 11, QFont.Weight.Bold))
-        tags_label.setStyleSheet(f"color: {COLORS['WHITE']};")
-        layout.addWidget(tags_label)
-        
-        # Tags display area
-        self.tags_container = QWidget()
-        self.tags_layout = QHBoxLayout(self.tags_container)
-        self.tags_layout.setContentsMargins(0, 0, 0, 0)
-        self.tags_layout.setSpacing(8)
-        self.tags_layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
-        layout.addWidget(self.tags_container)
-        
-        # Add tag input
-        add_tag_layout = QHBoxLayout()
-        self.tag_input = QLineEdit()
-        self.tag_input.setPlaceholderText("Add tag (e.g., fighting, punch, combo)")
-        self.tag_input.setMinimumHeight(40)
-        self.tag_input.setFont(QFont("Arial", 11))
-        self.tag_input.returnPressed.connect(self._add_tag)
-        add_tag_layout.addWidget(self.tag_input, 1)
-        
-        add_tag_btn = QPushButton("+ Add Tag")
-        add_tag_btn.setMinimumHeight(40)
-        add_tag_btn.setMinimumWidth(120)
-        add_tag_btn.setFont(QFont("Arial", 11, QFont.Weight.Bold))
-        add_tag_btn.setStyleSheet(self._button_style())
-        add_tag_btn.clicked.connect(self._add_tag)
-        add_tag_layout.addWidget(add_tag_btn)
-        
-        layout.addLayout(add_tag_layout)
+        # Re-record button
+        rerecord_btn = QPushButton("Re-record Motion")
+        rerecord_btn.setMinimumHeight(55)
+        rerecord_btn.setFont(QFont("Arial", 13, QFont.Weight.Bold))
+        rerecord_btn.setStyleSheet(self._action_button_style())
+        rerecord_btn.clicked.connect(self._rerecord_motion)
+        layout.addWidget(rerecord_btn)
         
         layout.addStretch()
         
@@ -217,36 +129,35 @@ class MotionEditDialog(QDialog):
         button_layout = QHBoxLayout()
         button_layout.setSpacing(15)
         
-        if self.motion_name:
-            delete_btn = QPushButton("Delete Motion")
-            delete_btn.setMinimumSize(140, 50)
-            delete_btn.setFont(QFont("Arial", 11, QFont.Weight.Bold))
-            delete_btn.setStyleSheet(f"""
-                QPushButton {{
-                    background-color: {COLORS['RED_DARK']};
-                    color: {COLORS['WHITE']};
-                    border: 2px solid {COLORS['RED_PRIMARY']};
-                    border-radius: 5px;
-                }}
-                QPushButton:hover {{
-                    background-color: {COLORS['RED_PRIMARY']};
-                    border: 2px solid {COLORS['RED_BRIGHT']};
-                }}
-            """)
-            delete_btn.clicked.connect(self._delete_motion)
-            button_layout.addWidget(delete_btn)
+        delete_btn = QPushButton("Delete Motion")
+        delete_btn.setMinimumSize(160, 60)
+        delete_btn.setFont(QFont("Arial", 12, QFont.Weight.Bold))
+        delete_btn.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {COLORS['RED_DARK']};
+                color: {COLORS['WHITE']};
+                border: 3px solid {COLORS['RED_PRIMARY']};
+                border-radius: 8px;
+            }}
+            QPushButton:hover {{
+                background-color: {COLORS['RED_PRIMARY']};
+                border: 3px solid {COLORS['RED_BRIGHT']};
+            }}
+        """)
+        delete_btn.clicked.connect(self._delete_motion)
+        button_layout.addWidget(delete_btn)
         
         button_layout.addStretch()
         
         cancel_btn = QPushButton("Cancel")
-        cancel_btn.setMinimumSize(120, 50)
-        cancel_btn.setFont(QFont("Arial", 11))
+        cancel_btn.setMinimumSize(140, 60)
+        cancel_btn.setFont(QFont("Arial", 12))
         cancel_btn.setStyleSheet(f"""
             QPushButton {{
                 background-color: {COLORS['GRAY']};
                 color: {COLORS['WHITE']};
                 border: 2px solid {COLORS['GRAY_LIGHT']};
-                border-radius: 5px;
+                border-radius: 8px;
             }}
             QPushButton:hover {{
                 background-color: {COLORS['GRAY_LIGHT']};
@@ -255,18 +166,19 @@ class MotionEditDialog(QDialog):
         cancel_btn.clicked.connect(self.reject)
         button_layout.addWidget(cancel_btn)
         
-        save_btn = QPushButton("Save Motion")
-        save_btn.setMinimumSize(150, 50)
-        save_btn.setFont(QFont("Arial", 12, QFont.Weight.Bold))
+        save_btn = QPushButton("Save Changes")
+        save_btn.setMinimumSize(180, 60)
+        save_btn.setFont(QFont("Arial", 14, QFont.Weight.Bold))
         save_btn.setStyleSheet(f"""
             QPushButton {{
                 background-color: {COLORS['RED_PRIMARY']};
                 color: {COLORS['WHITE']};
-                border: 3px solid {COLORS['RED_BRIGHT']};
-                border-radius: 5px;
+                border: 4px solid {COLORS['RED_BRIGHT']};
+                border-radius: 8px;
             }}
             QPushButton:hover {{
                 background-color: {COLORS['RED_BRIGHT']};
+                border: 4px solid {COLORS['WHITE']};
             }}
         """)
         save_btn.clicked.connect(self._save_motion)
@@ -274,9 +186,42 @@ class MotionEditDialog(QDialog):
         
         layout.addLayout(button_layout)
     
-    def _button_style(self) -> str:
-        """Standard button style."""
-        return f"""
+    def _add_field_row(self, parent_layout: QVBoxLayout, label: str, value: str, edit_callback):
+        """Add a field row with label, value, and Edit button."""
+        container = QWidget()
+        container_layout = QHBoxLayout(container)
+        container_layout.setContentsMargins(0, 0, 0, 0)
+        container_layout.setSpacing(15)
+        
+        # Label
+        field_label = QLabel(f"{label}:")
+        field_label.setFont(QFont("Arial", 11, QFont.Weight.Bold))
+        field_label.setStyleSheet(f"color: {COLORS['RED_BRIGHT']}; background: transparent;")
+        field_label.setFixedWidth(120)
+        container_layout.addWidget(field_label)
+        
+        # Value display
+        value_label = QLabel(value)
+        value_label.setFont(QFont("Arial", 12))
+        value_label.setStyleSheet(f"""
+            color: {COLORS['WHITE']};
+            background-color: {COLORS['GRAY_DARK']};
+            border: 2px solid {COLORS['RED_DARK']};
+            border-radius: 5px;
+            padding: 12px 15px;
+        """)
+        value_label.setWordWrap(True)
+        value_label.setMinimumHeight(50)
+        
+        # Store reference for updating
+        setattr(self, f"{label.lower()}_value_label", value_label)
+        container_layout.addWidget(value_label, 1)
+        
+        # Edit button
+        edit_btn = QPushButton("Edit")
+        edit_btn.setMinimumSize(100, 50)
+        edit_btn.setFont(QFont("Arial", 11, QFont.Weight.Bold))
+        edit_btn.setStyleSheet(f"""
             QPushButton {{
                 background-color: {COLORS['GRAY_DARK']};
                 color: {COLORS['WHITE']};
@@ -287,96 +232,131 @@ class MotionEditDialog(QDialog):
                 background-color: {COLORS['RED_DARK']};
                 border: 2px solid {COLORS['RED_BRIGHT']};
             }}
-            QPushButton:disabled {{
-                background-color: {COLORS['GRAY']};
-                color: {COLORS['GRAY_LIGHT']};
-                border: 2px solid {COLORS['GRAY']};
+        """)
+        edit_btn.clicked.connect(edit_callback)
+        container_layout.addWidget(edit_btn)
+        
+        parent_layout.addWidget(container)
+    
+    def _action_button_style(self) -> str:
+        """Style for action buttons."""
+        return f"""
+            QPushButton {{
+                background-color: {COLORS['GRAY_DARK']};
+                color: {COLORS['WHITE']};
+                border: 2px solid {COLORS['RED_PRIMARY']};
+                border-radius: 8px;
+            }}
+            QPushButton:hover {{
+                background-color: {COLORS['RED_DARK']};
+                border: 3px solid {COLORS['RED_BRIGHT']};
             }}
         """
     
-    def _set_placeholder_preview(self):
-        """Set placeholder preview image."""
-        pixmap = QPixmap(250, 200)
-        pixmap.fill(QColor(COLORS['RED_DARK']))
-        
-        painter = QPainter(pixmap)
-        painter.setPen(QColor(COLORS['WHITE']))
-        painter.setFont(QFont("Arial", 16, QFont.Weight.Bold))
-        painter.drawText(pixmap.rect(), Qt.AlignmentFlag.AlignCenter, "NO PREVIEW")
-        painter.end()
-        
-        self.preview_display.setPixmap(pixmap)
-    
     def _load_motion_data(self):
         """Load existing motion metadata."""
-        if not self.motion_name:
+        metadata_file = self.motion_path / "metadata.json"
+        
+        if not metadata_file.exists():
+            logger.warning(f"No metadata found for {self.motion_name}")
+            self.display_name = self.motion_name.replace('_', ' ').title()
             return
         
-        motion_path = self.motion_dir / self.motion_name
-        metadata_file = motion_path / "metadata.json"
+        try:
+            with open(metadata_file, 'r') as f:
+                data = json.load(f)
+            
+            self.display_name = data.get('display_name', self.motion_name)
+            self.description = data.get('description', '')
+            self.tags = data.get('tags', [])
+            
+            logger.info(f"Loaded motion data: {self.display_name}")
+            
+        except Exception as e:
+            logger.error(f"Failed to load motion metadata: {e}")
+            self.display_name = self.motion_name.replace('_', ' ').title()
+    
+    def _update_preview(self):
+        """Update preview image/GIF."""
+        # Try to find preview file
+        preview_file = self.motion_path / "preview.gif"
+        if not preview_file.exists():
+            preview_file = self.motion_path / "preview.png"
         
-        if metadata_file.exists():
-            try:
-                with open(metadata_file, 'r') as f:
-                    data = json.load(f)
-                
-                self.name_input.setText(data.get('display_name', self.motion_name))
-                self.desc_input.setPlainText(data.get('description', ''))
-                self.tags = data.get('tags', [])
-                self._refresh_tags()
-                
-                # Load preview
-                preview_file = motion_path / "preview.gif"
-                if not preview_file.exists():
-                    preview_file = motion_path / "preview.png"
-                
-                if preview_file.exists():
-                    pixmap = QPixmap(str(preview_file))
-                    if not pixmap.isNull():
-                        scaled = pixmap.scaled(250, 200, Qt.AspectRatioMode.KeepAspectRatio, 
-                                             Qt.TransformationMode.SmoothTransformation)
-                        self.preview_display.setPixmap(scaled)
-                        self.preview_path = preview_file
-                
-            except Exception as e:
-                logger.error(f"Failed to load motion metadata: {e}")
-    
-    def _add_tag(self):
-        """Add a tag."""
-        tag = self.tag_input.text().strip().lower()
-        if tag and tag not in self.tags:
-            self.tags.append(tag)
-            self._refresh_tags()
-            self.tag_input.clear()
-    
-    def _remove_tag(self, tag: str):
-        """Remove a tag."""
-        if tag in self.tags:
-            self.tags.remove(tag)
-            self._refresh_tags()
-    
-    def _refresh_tags(self):
-        """Refresh tags display."""
-        # Clear existing
-        while self.tags_layout.count():
-            item = self.tags_layout.takeAt(0)
-            widget = item.widget()
-            if widget:
-                widget.deleteLater()
+        if preview_file.exists():
+            pixmap = QPixmap(str(preview_file))
+            if not pixmap.isNull():
+                scaled = pixmap.scaled(400, 300, Qt.AspectRatioMode.KeepAspectRatio,
+                                     Qt.TransformationMode.SmoothTransformation)
+                self.preview_label.setPixmap(scaled)
+                self.preview_path = preview_file
+                return
         
-        # Add tag chips
-        for tag in self.tags:
-            chip = TagChip(tag)
-            chip.removed.connect(self._remove_tag)
-            self.tags_layout.addWidget(chip)
-        
-        self.tags_layout.addStretch()
+        # Placeholder
+        self.preview_label.setText("NO PREVIEW")
+        self.preview_label.setFont(QFont("Arial", 18, QFont.Weight.Bold))
+        self.preview_label.setStyleSheet(f"""
+            color: {COLORS['GRAY_LIGHT']};
+            background-color: {COLORS['GRAY_DARK']};
+            border: 3px solid {COLORS['RED_DARK']};
+            border-radius: 10px;
+        """)
     
-    def _upload_preview(self):
-        """Upload preview image."""
+    def _edit_name(self):
+        """Edit motion name inline."""
+        text, ok = QInputDialog.getText(
+            self,
+            "Edit Name",
+            "Motion Name:",
+            QLineEdit.EchoMode.Normal,
+            self.display_name
+        )
+        
+        if ok and text.strip():
+            self.display_name = text.strip()
+            self.name_value_label.setText(self.display_name)
+            logger.info(f"Name updated: {self.display_name}")
+    
+    def _edit_description(self):
+        """Edit description inline."""
+        text, ok = QInputDialog.getMultiLineText(
+            self,
+            "Edit Description",
+            "Motion Description:",
+            self.description
+        )
+        
+        if ok:
+            self.description = text.strip()
+            self.description_value_label.setText(self.description or "No description")
+            logger.info("Description updated")
+    
+    def _edit_tags(self):
+        """Edit tags inline."""
+        current_tags_str = ", ".join(self.tags)
+        text, ok = QInputDialog.getText(
+            self,
+            "Edit Tags",
+            "Tags (comma-separated):",
+            QLineEdit.EchoMode.Normal,
+            current_tags_str
+        )
+        
+        if ok:
+            # Parse tags
+            if text.strip():
+                self.tags = [t.strip().lower() for t in text.split(',') if t.strip()]
+            else:
+                self.tags = []
+            
+            self.tags_value_label.setText(", ".join(self.tags) if self.tags else "No tags")
+            logger.info(f"Tags updated: {self.tags}")
+    
+    def _change_preview(self):
+        """Change preview image/GIF."""
         file_path, _ = QFileDialog.getOpenFileName(
             self,
-            "Select Preview Image",
+            "Select Preview Image/GIF",
             "",
             "Images (*.png *.jpg *.jpeg *.gif);;All Files (*)"
         )
@@ -384,79 +364,73 @@ class MotionEditDialog(QDialog):
         if file_path:
             pixmap = QPixmap(file_path)
             if not pixmap.isNull():
-                scaled = pixmap.scaled(250, 200, Qt.AspectRatioMode.KeepAspectRatio,
+                scaled = pixmap.scaled(400, 300, Qt.AspectRatioMode.KeepAspectRatio,
                                      Qt.TransformationMode.SmoothTransformation)
-                self.preview_display.setPixmap(scaled)
+                self.preview_label.setPixmap(scaled)
                 self.preview_path = Path(file_path)
-                logger.info(f"Preview image uploaded: {file_path}")
+                logger.info(f"Preview changed: {file_path}")
     
     def _rerecord_motion(self):
         """Re-record motion (opens recording dialog)."""
-        # TODO: Integrate with recording system
-        QMessageBox.information(self, "Re-record", "Recording system integration coming soon!")
+        from .recording_dialog import RecordingDialog
+        dialog = RecordingDialog(self)
+        if dialog.exec():
+            logger.info("Motion re-recorded")
+            # Reload data
+            self._load_motion_data()
+            self._update_preview()
     
     def _save_motion(self):
-        """Save motion metadata."""
-        name = self.name_input.text().strip()
-        if not name:
-            QMessageBox.warning(self, "Missing Name", "Please enter a motion name.")
+        """Save motion metadata - NEVER creates new motion."""
+        if not self.display_name.strip():
+            show_warning(self, "Missing Name", "Please enter a motion name.")
             return
         
-        # Create motion folder
-        folder_name = name.lower().replace(' ', '_')
-        motion_path = self.motion_dir / folder_name
-        motion_path.mkdir(parents=True, exist_ok=True)
-        
-        # Save metadata
+        # Save to EXISTING motion folder (never create new)
         metadata = {
-            "motion_id": f"user/{folder_name}",
-            "display_name": name,
-            "description": self.desc_input.toPlainText().strip(),
+            "motion_id": f"user/{self.motion_name}",
+            "display_name": self.display_name,
+            "description": self.description,
             "category": "custom",
             "difficulty": "medium",
             "tags": self.tags,
             "preview_gif": "preview.gif",
             "author": "User",
-            "created_date": "2026-01-01",
             "version": "1.0"
         }
         
         try:
-            with open(motion_path / "metadata.json", 'w') as f:
+            # Save metadata to existing folder
+            with open(self.motion_path / "metadata.json", 'w') as f:
                 json.dump(metadata, f, indent=2)
             
-            # Copy preview if uploaded
+            # Copy preview if changed
             if self.preview_path and self.preview_path.exists():
                 import shutil
-                dest = motion_path / f"preview{self.preview_path.suffix}"
-                shutil.copy(str(self.preview_path), str(dest))
+                dest = self.motion_path / f"preview{self.preview_path.suffix}"
+                if dest != self.preview_path:  # Don't copy to itself
+                    shutil.copy(str(self.preview_path), str(dest))
             
-            logger.info(f"Motion saved: {name}")
-            self.motion_saved.emit(folder_name)
+            logger.info(f"Motion saved: {self.display_name}")
+            self.motion_saved.emit(self.motion_name)
             self.accept()
             
         except Exception as e:
             logger.error(f"Failed to save motion: {e}")
-            QMessageBox.critical(self, "Save Error", f"Failed to save motion:\n{e}")
+            show_error(self, "Save Error", f"Failed to save motion:\n{e}")
     
     def _delete_motion(self):
-        """Delete motion."""
-        if not self.motion_name:
-            return
-        
-        reply = QMessageBox.question(
+        """Delete this motion permanently."""
+        reply = show_question(
             self,
             "Delete Motion",
-            f"Permanently delete motion '{self.motion_name}'?\nThis cannot be undone.",
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+            f"Permanently delete motion '{self.display_name}'?\nThis cannot be undone."
         )
         
-        if reply == QMessageBox.StandardButton.Yes:
-            motion_path = self.motion_dir / self.motion_name
-            
+        if reply == 16384:  # QMessageBox.StandardButton.Yes
             try:
                 import shutil
-                shutil.rmtree(motion_path)
+                shutil.rmtree(self.motion_path)
                 
                 logger.info(f"Motion deleted: {self.motion_name}")
                 self.motion_deleted.emit(self.motion_name)
@@ -464,23 +438,4 @@ class MotionEditDialog(QDialog):
                 
             except Exception as e:
                 logger.error(f"Failed to delete motion: {e}")
-                QMessageBox.critical(self, "Delete Error", f"Failed to delete motion:\n{e}")
-    
-    def _apply_styles(self):
-        """Apply black-red theme."""
-        self.setStyleSheet(f"""
-            QDialog {{
-                background-color: {COLORS['PURE_BLACK']};
-            }}
-            
-            QLineEdit, QTextEdit {{
-                background-color: {COLORS['GRAY_DARK']};
-                color: {COLORS['WHITE']};
-                border: 2px solid {COLORS['RED_DARK']};
-                border-radius: 5px;
-                padding: 8px;
-            }}
-            QLineEdit:focus, QTextEdit:focus {{
-                border: 2px solid {COLORS['RED_BRIGHT']};
-            }}
-        """)
+                show_error(self, "Delete Error", f"Failed to delete motion:\n{e}")
